@@ -7,7 +7,7 @@ int main()
 {
     cout << "Hello World!" << endl;
 
-    BenchFileParser* parser = new BenchFileParser();
+    auto parser = new BenchFileParser();
 
     return 0;
 }
