@@ -5,6 +5,7 @@
 
 #include <boost/spirit/home/classic/actor.hpp>
 #include <boost/spirit/include/classic.hpp>
+#include <boost/spirit/include/qi_char_.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_match.hpp>
 #include <boost/lexical_cast.hpp>
@@ -43,20 +44,18 @@ unsigned BenchFileParser::count_inputs(std::string inputFile)
 void BenchFileParser::read_header(std::string inputFile)
 {
     namespace qi = boost::spirit::qi;
-    using boost::spirit::qi::skip;
 
     std::ifstream file(inputFile.c_str());
     std::string line;
 
     while (std::getline(file, line) && boost::starts_with(line, "#"))
     {
-        cout << "[DEBUG] " << line << endl;
         std::vector<std::string> counter;
 
         //inputs section
         bool const i_result = qi::parse(line.begin(), line.end(),
-                  skip(qi::space) ["#" >> +qi::digit >> "inputs"],
-                  counter);
+                qi::skip(qi::space) ["#" >> +qi::digit >> "inputs"],
+                counter);
 
         if (i_result && counter.size() == 1)
         {
@@ -66,8 +65,8 @@ void BenchFileParser::read_header(std::string inputFile)
         //outputs section
         counter.clear();
         bool const o_result = qi::parse(line.begin(), line.end(),
-                  skip(qi::space) ["#" >> +qi::digit >> "outputs"],
-                  counter);
+                qi::skip(qi::space) ["#" >> +qi::digit >> "outputs"],
+                counter);
 
         if (o_result && counter.size() == 1)
         {
@@ -77,14 +76,29 @@ void BenchFileParser::read_header(std::string inputFile)
         //inverters section
         counter.clear();
         bool const inv_result = qi::parse(line.begin(), line.end(),
-                  skip(qi::space) ["#" >> +qi::digit >> "inverter"],
-                  counter);
+                qi::skip(qi::space) ["#" >> +qi::digit >> "inverter"],
+                counter);
 
         if (inv_result && counter.size() == 1)
         {
             m_inverter = boost::lexical_cast<unsigned>(counter[0]);
         }
+
+        //gates section
+        counter.clear();
+        bool const gate_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) ["#" >> +qi::digit >> "gates"],
+                counter);
+        if ( gate_result && counter.size() == 1)
+        {
+            read_gates(line);
+        }
     }
+}
+
+void BenchFileParser::read_gates(std::string gateLine)
+{
+    cout << "[DEBUG] reading gate line: " << gateLine << endl;
 }
 
 void BenchFileParser::parseFile(std::string inputFile)

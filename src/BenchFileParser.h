@@ -21,5 +21,6 @@ private:
 private:
     void parseFile(std::string inputFile);
     unsigned count_inputs(std::string inputFile);
+    void read_gates(std::string gateLine);
     void read_header(std::string inputFile);
 };
