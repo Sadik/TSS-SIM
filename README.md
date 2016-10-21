@@ -2,6 +2,8 @@
 
 sudo apt-get install libboost1.58-dev
 
+currently in use: version 1.62
+
 #### Boost
 
 Note:
