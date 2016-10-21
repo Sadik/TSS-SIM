@@ -96,9 +96,91 @@ void BenchFileParser::read_header(std::string inputFile)
     }
 }
 
-void BenchFileParser::read_gates(std::string gateLine)
+void BenchFileParser::read_gates(std::string line)
 {
-    cout << "[DEBUG] reading gate line: " << gateLine << endl;
+    namespace qi = boost::spirit::qi;
+
+    //cout << "[DEBUG] reading gate line: " << line << endl;
+    std::vector<std::string> counter;
+
+    //AND sector
+    bool const AND_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit[qi::char_('#') >> +qi::digit >> "gates" >> qi::char_('(')]
+            >> qi::omit[*(*qi::digit >> (qi::ascii::string("NANDs") | qi::ascii::string("ORs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> *qi::digit >> "ANDs"
+            >> qi::omit[*(-qi::char_('+') >> *qi::digit >> (qi::ascii::string("NANDs") | qi::ascii::string("ORs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> qi::omit[qi::char_(')')]],
+            counter);
+
+    if (AND_result && counter.size() == 1)
+    {
+        m_ANDs = boost::lexical_cast<unsigned>(counter[0]);
+        //cout << "    [DEBUG] m_ANDs:" << m_ANDs << endl;
+    }
+
+    //NAND sector
+    counter.clear();
+    bool const NAND_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit[qi::char_('#') >> +qi::digit >> "gates" >> qi::char_('(')]
+            >> qi::omit[*(*qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("ORs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> *qi::digit >> "NANDs"
+            >> qi::omit[*(-qi::char_('+') >> *qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("ORs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> qi::omit[qi::char_(')')]],
+            counter);
+
+    if (NAND_result && counter.size() == 1)
+    {
+        m_NANDs = boost::lexical_cast<unsigned>(counter[0]);
+        //cout << "    [DEBUG] m_NANDs:" << m_NANDs << endl;
+    }
+
+    //OR sector
+    counter.clear();
+    bool const OR_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit[qi::char_('#') >> +qi::digit >> "gates" >> qi::char_('(')]
+            >> qi::omit[*(*qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> *qi::digit >> "ORs"
+            >> qi::omit[*(-qi::char_('+') >> *qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("NORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> qi::omit[qi::char_(')')]],
+            counter);
+
+    if (OR_result && counter.size() == 1)
+    {
+        m_ORs = boost::lexical_cast<unsigned>(counter[0]);
+        //cout << "    [DEBUG] m_ORs:" << m_ORs << endl;
+    }
+
+    //NOR sector
+    counter.clear();
+    bool const NOR_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit[qi::char_('#') >> +qi::digit >> "gates" >> qi::char_('(')]
+            >> qi::omit[*(*qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("ORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> *qi::digit >> "NORs"
+            >> qi::omit[*(-qi::char_('+') >> *qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("ORs")| qi::ascii::string("buffers")) >> -qi::char_('+'))]
+            >> qi::omit[qi::char_(')')]],
+            counter);
+
+    if (NOR_result && counter.size() == 1)
+    {
+        m_NORs = boost::lexical_cast<unsigned>(counter[0]);
+        //cout << "    [DEBUG] m_NORs:" << m_NORs << endl;
+    }
+
+    //buffer sector
+    counter.clear();
+    bool const buffer_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit[qi::char_('#') >> +qi::digit >> "gates" >> qi::char_('(')]
+            >> qi::omit[*(*qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("ORs")| qi::ascii::string("NORs")) >> -qi::char_('+'))]
+            >> *qi::digit >> "buffers"
+            >> qi::omit[*(-qi::char_('+') >> *qi::digit >> (qi::ascii::string("ANDs") | qi::ascii::string("NANDs") | qi::ascii::string("ORs")| qi::ascii::string("NORs")) >> -qi::char_('+'))]
+            >> qi::omit[qi::char_(')')]],
+            counter);
+
+    if (buffer_result && counter.size() == 1)
+    {
+        m_buffers = boost::lexical_cast<unsigned>(counter[0]);
+        //cout << "    [DEBUG] m_bufers:" << m_buffers << endl;
+    }
 }
 
 void BenchFileParser::parseFile(std::string inputFile)
