@@ -1,3 +1,12 @@
+/**
+ * @file   BenchFileParser.cc
+ * @Author Sadik Özoguz (sadik@informatik.uni-bremen.de)
+ * @date   Oktober, 2016
+ * @brief  Parses a bench file hopefully
+ *
+ * Some time it will...
+ */
+
 #include "BenchFileParser.h"
 
 #include <boost/algorithm/string.hpp>
@@ -22,25 +31,10 @@ BenchFileParser::BenchFileParser()
 
 }
 
-unsigned BenchFileParser::count_inputs(std::string inputFile)
-{
-    unsigned input_counter = 0;
-    std::ifstream file(inputFile.c_str());
-    std::string line;
-
-    while (std::getline(file, line))
-    {
-        cout << "[DEBUG] " << line << endl;
-        parse(line.c_str(),
-              *( str_p("inputs")[increment_a(input_counter)]
-              | anychar_p
-              ));
-        cout << "[DEBUG] input_counter: " << input_counter << endl;
-    }
-
-    return input_counter;
-}
-
+/**
+ * @brief this function is called by constructor to read the file header, count inputs, outputs, inverters and gates and store the numbers in member variables
+ * @param file name
+ */
 void BenchFileParser::read_header(std::string inputFile)
 {
     namespace qi = boost::spirit::qi;
@@ -96,6 +90,10 @@ void BenchFileParser::read_header(std::string inputFile)
     }
 }
 
+/**
+ * @brief function is called by read_header. It counts the number of ANDs, NANDs, ORs, NORs and buffers specified in the file header
+ * @param filename
+ */
 void BenchFileParser::read_gates(std::string line)
 {
     namespace qi = boost::spirit::qi;
