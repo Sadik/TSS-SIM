@@ -61,7 +61,6 @@ void BenchFileParser::read_header(std::string inputFile)
         if (i_result && counter.size() == 1)
         {
             m_inputs = boost::lexical_cast<unsigned>(counter[0]);
-            cout << "    [DEBUG]: " << m_inputs << endl;
         }
 
         //outputs section
@@ -73,7 +72,6 @@ void BenchFileParser::read_header(std::string inputFile)
         if (o_result && counter.size() == 1)
         {
             m_outputs = boost::lexical_cast<unsigned>(counter[0]);
-            cout << "    [DEBUG]: " << m_outputs << endl;
         }
 
         //inverters section
@@ -85,7 +83,6 @@ void BenchFileParser::read_header(std::string inputFile)
         if (inv_result && counter.size() == 1)
         {
             m_inverter = boost::lexical_cast<unsigned>(counter[0]);
-            cout << "    [DEBUG]: " << m_inverter << endl;
         }
     }
 }
@@ -93,10 +90,6 @@ void BenchFileParser::read_header(std::string inputFile)
 void BenchFileParser::parseFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
-
-    //unsigned input_counter = count_inputs(inputFile);
-    //cout << "[DEBUG] file contains " << input_counter << " inputs" << endl;
-
     cout << "[INFO] reading header" << endl;
     read_header(inputFile);
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
