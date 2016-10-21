@@ -13,8 +13,7 @@ set(Boost_USE_MULTITHREADED ON)
 
 find_package(Boost
              1.62.0
-             COMPONENTS program_options
-             REQUIRED)
+             )
 
 #find_package(Boost 1.58.0 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
