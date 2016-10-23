@@ -5,7 +5,12 @@
 #include <string>
 #include <vector>
 
+#include "AND.h"
+#include "BUF.h"
 #include "NAND.h"
+#include "NOR.h"
+#include "NOT.h"
+#include "OR.h"
 
 using namespace std;
 
@@ -26,7 +31,12 @@ private:
 
     std::vector<unsigned> m_inputs;
     std::vector<unsigned> m_outputs;
+    std::vector<AND*> m_ANDs;
     std::vector<NAND*> m_NANDs;
+    std::vector<OR*> m_ORs;
+    std::vector<NOR*> m_NORs;
+    std::vector<NOT*> m_NOTs;
+    std::vector<BUF*> m_BUFs;
 private:
     unsigned count_inputs(std::string inputFile);
     void parseFile(std::string inputFile);

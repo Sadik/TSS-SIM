@@ -180,6 +180,8 @@ void BenchFileParser::read_gates(std::string line)
         //cout << "    [DEBUG] m_bufers:" << m_buffers << endl;
     }
 }
+//TODO: accept mixed type instead of number
+//TODO: accept more than two inputs
 
 void BenchFileParser::read_body(string inputFile)
 {
@@ -219,6 +221,20 @@ void BenchFileParser::read_body(string inputFile)
             m_outputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
+        //AND section
+        values_str.clear();
+        bool const and_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
+        if (and_result && values_str.size() == 3)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
+            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
+            m_ANDs.push_back(new AND(i1, i2, o));
+        }
+
         //NAND section
         values_str.clear();
         bool const nand_result = qi::parse(line.begin(), line.end(),
@@ -230,10 +246,61 @@ void BenchFileParser::read_body(string inputFile)
             unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
             unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
             unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
-            cout << "i1: " << values_str[1];
-            cout << "    i2: " << values_str[2];
-            cout << "    o: " << values_str[0] << endl;
             m_NANDs.push_back(new NAND(i1, i2, o));
+        }
+
+        //OR section
+        values_str.clear();
+        bool const or_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
+        if (or_result && values_str.size() == 3)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
+            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
+            m_ORs.push_back(new OR(i1, i2, o));
+        }
+
+        //NOR section
+        values_str.clear();
+        bool const nor_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
+        if (nor_result && values_str.size() == 3)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
+            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
+            m_NORs.push_back(new NOR(i1, i2, o));
+        }
+
+        //NOT section
+        values_str.clear();
+        bool const not_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
+        if (not_result && values_str.size() == 2)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i = boost::lexical_cast<unsigned>(values_str[1]);
+            m_NOTs.push_back(new NOT(i, o));
+        }
+
+        //BUF section
+        values_str.clear();
+        bool const not_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
+        if (buf_result && values_str.size() == 2)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i = boost::lexical_cast<unsigned>(values_str[1]);
+            m_BUFs.push_back(new BUF(i, o));
         }
     }
 }
@@ -279,6 +346,14 @@ void BenchFileParser::prettyPrintInfos()
             cout << u << " ";
         }
         cout << endl;
+    }
+    if (m_ANDs.size() >= 1)
+    {
+        cout << "[STAT] ANDs:" << endl;
+        BOOST_FOREACH(AND* n, m_ANDs)
+        {
+            n->prettyPrint();
+        }
     }
     if (m_NANDs.size() >= 1)
     {
