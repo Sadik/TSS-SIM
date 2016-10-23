@@ -75,7 +75,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
         if (inv_result && counter.size() == 1)
         {
-            m_inverter = boost::lexical_cast<unsigned>(counter[0]);
+            m_inverters = boost::lexical_cast<unsigned>(counter[0]);
         }
 
         //gates section
@@ -92,7 +92,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
 /**
  * @brief function is called by read_header. It counts the number of ANDs, NANDs, ORs, NORs and buffers specified in the file header
- * @param filename
+ * @param line
  */
 void BenchFileParser::read_gates(std::string line)
 {
@@ -181,11 +181,67 @@ void BenchFileParser::read_gates(std::string line)
     }
 }
 
+void BenchFileParser::read_body(string inputFile)
+{
+    std::cout << "[INFO] reading body" << std::endl;
+
+    namespace qi = boost::spirit::qi;
+
+    std::ifstream file(inputFile.c_str());
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (boost::starts_with(line, "#")) {
+            continue;
+        }
+
+        cout << "[DEBUG] reading line: " << line << endl;
+        std::vector<std::string> i_values_str;
+
+        //inputs section
+        bool const i_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> qi::digit >> qi::omit[qi::char_(")")]],
+                i_values_str);
+
+        if (i_result && i_values_str.size() == 1)
+        {
+            m_i_values.push_back( boost::lexical_cast<unsigned>(i_values_str[0]) );
+        }
+    }
+}
+
+/**
+ * @brief parses file specified by inputFile
+ * @param inputFile file name
+ */
 void BenchFileParser::parseFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
     cout << "[INFO] reading header" << endl;
     read_header(inputFile);
+    read_body(inputFile);
+    prettyPrintInfos();
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
 }
 
+void BenchFileParser::prettyPrintInfos()
+{
+    cout << "[STAT] " << endl;
+    cout << "       inputs:    " << m_inputs << endl;
+    cout << "       outputs:   " << m_outputs << endl;
+    cout << "       inverters: " << m_inverters << endl;
+    cout << "       AND Gates: " << m_ANDs << endl;
+    cout << "       OR Gates:  " << m_ORs << endl;
+    cout << "       NAND Gates:" << m_NANDs << endl;
+    cout << "       NOR Gates: " << m_NORs << endl;
+    cout << "       buffers:   " << m_buffers << endl;
+
+    if (m_i_values.size() >= 1){
+        cout << "       input values: ";
+        BOOST_FOREACH(unsigned u, m_i_values)
+        {
+            cout << u << " ";
+        }
+        cout << endl;
+    }
+}
