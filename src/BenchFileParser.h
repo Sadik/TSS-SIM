@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "NAND.h"
+
 using namespace std;
 
 class BenchFileParser
@@ -11,18 +14,19 @@ class BenchFileParser
 public:
     BenchFileParser();
 private:
-    unsigned m_inputs;
-    unsigned m_outputs;
-    unsigned m_dff;
-    unsigned m_inverters;
-    unsigned m_ANDs;
-    unsigned m_ORs;
-    unsigned m_NANDs;
-    unsigned m_NORs;
-    unsigned m_buffers;
+    unsigned m_inputs_count;
+    unsigned m_outputs_count;
+    unsigned m_dff_count;
+    unsigned m_inverters_count;
+    unsigned m_ANDs_count;
+    unsigned m_ORs_count;
+    unsigned m_NANDs_count;
+    unsigned m_NORs_count;
+    unsigned m_buffers_count;
 
-    std::vector<unsigned> m_i_values;
-    std::vector<unsigned> m_o_values;
+    std::vector<unsigned> m_inputs;
+    std::vector<unsigned> m_outputs;
+    std::vector<NAND*> m_NANDs;
 private:
     unsigned count_inputs(std::string inputFile);
     void parseFile(std::string inputFile);

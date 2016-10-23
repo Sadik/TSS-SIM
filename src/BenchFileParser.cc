@@ -53,7 +53,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
         if (i_result && counter.size() == 1)
         {
-            m_inputs = boost::lexical_cast<unsigned>(counter[0]);
+            m_inputs_count = boost::lexical_cast<unsigned>(counter[0]);
         }
 
         //outputs section
@@ -64,7 +64,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
         if (o_result && counter.size() == 1)
         {
-            m_outputs = boost::lexical_cast<unsigned>(counter[0]);
+            m_outputs_count = boost::lexical_cast<unsigned>(counter[0]);
         }
 
         //inverters section
@@ -75,7 +75,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
         if (inv_result && counter.size() == 1)
         {
-            m_inverters = boost::lexical_cast<unsigned>(counter[0]);
+            m_inverters_count = boost::lexical_cast<unsigned>(counter[0]);
         }
 
         //gates section
@@ -112,7 +112,7 @@ void BenchFileParser::read_gates(std::string line)
 
     if (AND_result && counter.size() == 1)
     {
-        m_ANDs = boost::lexical_cast<unsigned>(counter[0]);
+        m_ANDs_count = boost::lexical_cast<unsigned>(counter[0]);
         //cout << "    [DEBUG] m_ANDs:" << m_ANDs << endl;
     }
 
@@ -128,7 +128,7 @@ void BenchFileParser::read_gates(std::string line)
 
     if (NAND_result && counter.size() == 1)
     {
-        m_NANDs = boost::lexical_cast<unsigned>(counter[0]);
+        m_NANDs_count = boost::lexical_cast<unsigned>(counter[0]);
         //cout << "    [DEBUG] m_NANDs:" << m_NANDs << endl;
     }
 
@@ -144,7 +144,7 @@ void BenchFileParser::read_gates(std::string line)
 
     if (OR_result && counter.size() == 1)
     {
-        m_ORs = boost::lexical_cast<unsigned>(counter[0]);
+        m_ORs_count = boost::lexical_cast<unsigned>(counter[0]);
         //cout << "    [DEBUG] m_ORs:" << m_ORs << endl;
     }
 
@@ -160,7 +160,7 @@ void BenchFileParser::read_gates(std::string line)
 
     if (NOR_result && counter.size() == 1)
     {
-        m_NORs = boost::lexical_cast<unsigned>(counter[0]);
+        m_NORs_count = boost::lexical_cast<unsigned>(counter[0]);
         //cout << "    [DEBUG] m_NORs:" << m_NORs << endl;
     }
 
@@ -176,7 +176,7 @@ void BenchFileParser::read_gates(std::string line)
 
     if (buffer_result && counter.size() == 1)
     {
-        m_buffers = boost::lexical_cast<unsigned>(counter[0]);
+        m_buffers_count = boost::lexical_cast<unsigned>(counter[0]);
         //cout << "    [DEBUG] m_bufers:" << m_buffers << endl;
     }
 }
@@ -205,7 +205,7 @@ void BenchFileParser::read_body(string inputFile)
 
         if (i_result && values_str.size() == 1)
         {
-            m_i_values.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+            m_inputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
         //outputs section
@@ -216,7 +216,24 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
         if (o_result && values_str.size() == 1)
         {
-            m_o_values.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+            m_outputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+        }
+
+        //NAND section
+        values_str.clear();
+        bool const nand_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
+        if (nand_result && values_str.size() == 3)
+        {
+            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
+            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
+            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
+            cout << "i1: " << values_str[1];
+            cout << "    i2: " << values_str[2];
+            cout << "    o: " << values_str[0] << endl;
+            m_NANDs.push_back(new NAND(i1, i2, o));
         }
     }
 }
@@ -238,29 +255,37 @@ void BenchFileParser::parseFile(std::string inputFile)
 void BenchFileParser::prettyPrintInfos()
 {
     cout << "[STAT] " << endl;
-    cout << "       inputs:    " << m_inputs << endl;
-    cout << "       outputs:   " << m_outputs << endl;
-    cout << "       inverters: " << m_inverters << endl;
-    cout << "       AND Gates: " << m_ANDs << endl;
-    cout << "       OR Gates:  " << m_ORs << endl;
-    cout << "       NAND Gates:" << m_NANDs << endl;
-    cout << "       NOR Gates: " << m_NORs << endl;
-    cout << "       buffers:   " << m_buffers << endl;
+    cout << "       inputs:    " << m_inputs_count << endl;
+    cout << "       outputs:   " << m_outputs_count << endl;
+    cout << "       inverters: " << m_inverters_count << endl;
+    cout << "       AND Gates: " << m_ANDs_count << endl;
+    cout << "       OR Gates:  " << m_ORs_count << endl;
+    cout << "       NAND Gates:" << m_NANDs_count << endl;
+    cout << "       NOR Gates: " << m_NORs_count << endl;
+    cout << "       buffers:   " << m_buffers_count << endl;
 
-    if (m_i_values.size() >= 1){
-        cout << "       input values: ";
-        BOOST_FOREACH(unsigned u, m_i_values)
+    if (m_inputs.size() >= 1){
+        cout << "       inputs: ";
+        BOOST_FOREACH(unsigned u, m_inputs)
         {
             cout << u << " ";
         }
         cout << endl;
     }
-    if (m_o_values.size() >= 1){
-        cout << "       output values: ";
-        BOOST_FOREACH(unsigned u, m_o_values)
+    if (m_outputs.size() >= 1){
+        cout << "       outputs: ";
+        BOOST_FOREACH(unsigned u, m_outputs)
         {
             cout << u << " ";
         }
         cout << endl;
+    }
+    if (m_NANDs.size() >= 1)
+    {
+        cout << "[STAT] NANDs:" << endl;
+        BOOST_FOREACH(NAND* n, m_NANDs)
+        {
+            n->prettyPrint();
+        }
     }
 }
