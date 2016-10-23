@@ -195,17 +195,28 @@ void BenchFileParser::read_body(string inputFile)
             continue;
         }
 
-        cout << "[DEBUG] reading line: " << line << endl;
-        std::vector<std::string> i_values_str;
+//        cout << "[DEBUG] reading line: " << line << endl;
+        std::vector<std::string> values_str;
 
         //inputs section
         bool const i_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> qi::digit >> qi::omit[qi::char_(")")]],
-                i_values_str);
+                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
 
-        if (i_result && i_values_str.size() == 1)
+        if (i_result && values_str.size() == 1)
         {
-            m_i_values.push_back( boost::lexical_cast<unsigned>(i_values_str[0]) );
+            m_i_values.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+        }
+
+        //outputs section
+        values_str.clear();
+        bool const o_result = qi::parse(line.begin(), line.end(),
+                qi::skip(qi::space) [qi::omit["OUTPUT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                values_str);
+//        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
+        if (o_result && values_str.size() == 1)
+        {
+            m_o_values.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
     }
 }
@@ -239,6 +250,14 @@ void BenchFileParser::prettyPrintInfos()
     if (m_i_values.size() >= 1){
         cout << "       input values: ";
         BOOST_FOREACH(unsigned u, m_i_values)
+        {
+            cout << u << " ";
+        }
+        cout << endl;
+    }
+    if (m_o_values.size() >= 1){
+        cout << "       output values: ";
+        BOOST_FOREACH(unsigned u, m_o_values)
         {
             cout << u << " ";
         }

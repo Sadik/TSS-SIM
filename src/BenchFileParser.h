@@ -22,6 +22,7 @@ private:
     unsigned m_buffers;
 
     std::vector<unsigned> m_i_values;
+    std::vector<unsigned> m_o_values;
 private:
     unsigned count_inputs(std::string inputFile);
     void parseFile(std::string inputFile);
