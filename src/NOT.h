@@ -1,13 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-class NOT
+class NOT : public Gate
 {
 public:
-    NOT(unsigned i_, unsigned o_);
+    NOT(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i;
-    unsigned o;
 };

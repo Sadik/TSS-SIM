@@ -1,14 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-class NOR
+class NOR : public Gate
 {
 public:
-    NOR(unsigned i1_, unsigned i2_, unsigned o_);
+    NOR(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i1;
-    unsigned i2;
-    unsigned o;
 };

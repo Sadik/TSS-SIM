@@ -1,13 +1,16 @@
 #include "BUF.h"
 
-BUF::BUF(unsigned i_, unsigned o_)
+BUF::BUF(std::vector<Signal *> inputs, Signal *output)
+    : Gate(inputs, output)
 {
-    i = i_;
-    o = o_;
 }
 
-void BUF::prettyPrint()
+void BUF::BUF::prettyPrint()
 {
-    using namespace std;
-    cout << "            i:" << i << " " << "o:" << o << endl;
+    std::cout << "[DEBUG]: inputs of this BUF: ";
+    BOOST_FOREACH(Signal* s, inputs())
+    {
+        std::cout << s->name() << " ";
+    }
+    std::cout << "         output: " << output()->name() << std::endl;
 }

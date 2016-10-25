@@ -1,13 +1,16 @@
 #include "NOT.h"
 
-NOT::NOT(unsigned i_, unsigned o_)
+NOT::NOT(std::vector<Signal *> inputs, Signal *output)
+    : Gate(inputs, output)
 {
-    i = i_;
-    o = o_;
 }
 
-void NOT::prettyPrint()
+void NOT::NOT::prettyPrint()
 {
-    using namespace std;
-    cout << "            i:" << i << " " << "o:" << o << endl;
+    std::cout << "[DEBUG]: inputs of this NOT: ";
+    BOOST_FOREACH(Signal* s, inputs())
+    {
+        std::cout << s->name() << " ";
+    }
+    std::cout << "         output: " << output()->name() << std::endl;
 }

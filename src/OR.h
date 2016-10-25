@@ -1,14 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-class OR
+class OR : public Gate
 {
 public:
-    OR(unsigned i1_, unsigned i2_, unsigned o_);
+    OR(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i1;
-    unsigned i2;
-    unsigned o;
 };

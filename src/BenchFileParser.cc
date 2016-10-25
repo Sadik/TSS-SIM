@@ -209,7 +209,6 @@ void BenchFileParser::read_body(string inputFile)
         if (i_result && values_str.size() == 1)
         {
             m_netlist->addPrimaryInput(new Signal(values_str[0], true));
-//            m_inputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
         //outputs section
@@ -221,24 +220,37 @@ void BenchFileParser::read_body(string inputFile)
         if (o_result && values_str.size() == 1)
         {
             m_netlist->addPrimaryOutput(new Signal(values_str[0], true));
-//            m_outputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
         //AND section
         values_str.clear();
         bool const and_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
-        if (and_result && values_str.size() == 3)
+        if (and_result)
         {
-            Signal* si1 = new Signal(values_str[1], false);
-            Signal* si2 = new Signal(values_str[2]);
-            Signal* so = new Signal(values_str[0]);
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
             vector<Signal*> inputs;
-            inputs.push_back(si1);
-            inputs.push_back(si2);
-            m_ANDs.push_back(new AND(inputs,so));
+            BOOST_FOREACH(std::string signalName, values_str)
+            {
+                if (signalName == values_str[0]){
+                    continue;
+                }
+                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                if (s)
+                {
+                    inputs.push_back(s);
+                } else {
+                    inputs.push_back(new Signal(signalName));
+                }
+            }
+
+            m_netlist->addAND(new AND(inputs,so));
         }
 
         //NAND section
@@ -254,14 +266,12 @@ void BenchFileParser::read_body(string inputFile)
             {
                 so = new Signal(values_str[0]);
             }
-            so = new Signal(values_str[0]);
             vector<Signal*> inputs;
             BOOST_FOREACH(std::string signalName, values_str)
             {
                 if (signalName == values_str[0]){
                     continue;
                 }
-                cout << "SIGNAL NAME: " << signalName << endl;
                 Signal* s = m_netlist->getPrimaryInputByName(signalName);
                 if (s)
                 {
@@ -271,35 +281,69 @@ void BenchFileParser::read_body(string inputFile)
                 }
             }
 
-            m_NANDs.push_back(new NAND(inputs,so));
+            m_netlist->addNAND(new NAND(inputs,so));
         }
 
         //OR section
         values_str.clear();
         bool const or_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
-        if (or_result && values_str.size() == 3)
+        if (or_result)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
-            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
-            m_ORs.push_back(new OR(i1, i2, o));
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
+            vector<Signal*> inputs;
+            BOOST_FOREACH(std::string signalName, values_str)
+            {
+                if (signalName == values_str[0]){
+                    continue;
+                }
+                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                if (s)
+                {
+                    inputs.push_back(s);
+                } else {
+                    inputs.push_back(new Signal(signalName));
+                }
+            }
+
+            m_netlist->addOR(new OR(inputs,so));
         }
 
         //NOR section
         values_str.clear();
         bool const nor_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
-        if (nor_result && values_str.size() == 3)
+        if (nor_result)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
-            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
-            m_NORs.push_back(new NOR(i1, i2, o));
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
+            vector<Signal*> inputs;
+            BOOST_FOREACH(std::string signalName, values_str)
+            {
+                if (signalName == values_str[0]){
+                    continue;
+                }
+                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                if (s)
+                {
+                    inputs.push_back(s);
+                } else {
+                    inputs.push_back(new Signal(signalName));
+                }
+            }
+
+            m_netlist->addNOR(new NOR(inputs,so));
         }
 
         //NOT section
@@ -310,9 +354,20 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
         if (not_result && values_str.size() == 2)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i = boost::lexical_cast<unsigned>(values_str[1]);
-            m_NOTs.push_back(new NOT(i, o));
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
+            vector<Signal*> inputs;
+            Signal* si = m_netlist->getPrimaryInputByName(values_str[1]);
+            if (!si)
+            {
+                si = new Signal(values_str[1]);
+            }
+            inputs.push_back(si);
+
+            m_netlist->addNOT(new NOT(inputs,so));
         }
 
         //BUF section
@@ -323,9 +378,20 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
         if (buf_result && values_str.size() == 2)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i = boost::lexical_cast<unsigned>(values_str[1]);
-            m_BUFs.push_back(new BUF(i, o));
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
+            vector<Signal*> inputs;
+            Signal* si = m_netlist->getPrimaryInputByName(values_str[1]);
+            if (!si)
+            {
+                si = new Signal(values_str[1]);
+            }
+            inputs.push_back(si);
+
+            m_netlist->addBUF(new BUF(inputs,so));
         }
     }
 }
@@ -338,7 +404,7 @@ void BenchFileParser::parseFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
     cout << "[INFO] reading header" << endl;
-    read_header(inputFile);
+//    read_header(inputFile);
     read_body(inputFile);
     prettyPrintInfos();
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
@@ -372,18 +438,18 @@ void BenchFileParser::prettyPrintInfos()
         }
         cout << endl;
     }
-    if (m_ANDs.size() >= 1)
+    if (m_netlist->ANDs().size() >= 1)
     {
         cout << "[STAT] ANDs:" << endl;
-        BOOST_FOREACH(AND* n, m_ANDs)
+        BOOST_FOREACH(AND* n, m_netlist->ANDs())
         {
             n->prettyPrint();
         }
     }
-    if (m_NANDs.size() >= 1)
+    if (m_netlist->NANDs().size() >= 1)
     {
         cout << "[STAT] NANDs:" << endl;
-        BOOST_FOREACH(NAND* n, m_NANDs)
+        BOOST_FOREACH(NAND* n, m_netlist->NANDs())
         {
             n->prettyPrint();
         }

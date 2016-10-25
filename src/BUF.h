@@ -1,13 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-class BUF
+class BUF : public Gate
 {
 public:
-    BUF(unsigned i_, unsigned o_);
+    BUF(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i;
-    unsigned o;
 };
