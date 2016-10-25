@@ -1,15 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-using namespace std;
-class NAND
+class NAND : public Gate
 {
 public:
-    NAND(unsigned i1_, unsigned i2_, unsigned o_);
+    NAND(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i1;
-    unsigned i2;
-    unsigned o;
 };

@@ -1,14 +1,17 @@
 #include "NAND.h"
 
-NAND::NAND(unsigned i1_, unsigned i2_, unsigned o_)
+NAND::NAND(std::vector<Signal *> inputs, Signal *output)
+    : Gate(inputs, output)
 {
-    i1 = i1_;
-    i2 = i2_;
-    o = o_;
 }
 
 void NAND::NAND::prettyPrint()
 {
-    using namespace std;
-    cout << "            i1:" << i1 << " " << "i2:" << i2 << " " << "o:" << o << endl;
+    std::cout << "[DEBUG]: inputs of this NAND: ";
+    BOOST_FOREACH(Signal* s, inputs())
+    {
+        std::cout << s->name() << " ";
+    }
+
+    std::cout << "         output: " << output()->name() << std::endl;
 }

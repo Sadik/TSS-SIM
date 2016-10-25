@@ -1,15 +1,12 @@
 #pragma once
 
+#include "Gate.h"
 #include <iostream>
+#include <boost/foreach.hpp>
 
-using namespace std;
-class AND
+class AND : public Gate
 {
 public:
-    AND(unsigned i2_, unsigned i1_, unsigned o_);
+    AND(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-private:
-    unsigned i1;
-    unsigned i2;
-    unsigned o;
 };

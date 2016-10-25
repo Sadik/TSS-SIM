@@ -27,6 +27,7 @@ using namespace std;
 BenchFileParser::BenchFileParser()
 {
     cout << "[INFO] BenchFileParser created" << endl;
+    m_netlist = new Netlist();
     parseFile("c17.bench");
 
 }
@@ -207,7 +208,8 @@ void BenchFileParser::read_body(string inputFile)
 
         if (i_result && values_str.size() == 1)
         {
-            m_inputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+            m_netlist->addPrimaryInput(new Signal(values_str[0], true));
+//            m_inputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
         //outputs section
@@ -218,7 +220,8 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
         if (o_result && values_str.size() == 1)
         {
-            m_outputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
+            m_netlist->addPrimaryOutput(new Signal(values_str[0], true));
+//            m_outputs.push_back( boost::lexical_cast<unsigned>(values_str[0]) );
         }
 
         //AND section
@@ -229,24 +232,46 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
         if (and_result && values_str.size() == 3)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
-            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
-            m_ANDs.push_back(new AND(i1, i2, o));
+            Signal* si1 = new Signal(values_str[1], false);
+            Signal* si2 = new Signal(values_str[2]);
+            Signal* so = new Signal(values_str[0]);
+            vector<Signal*> inputs;
+            inputs.push_back(si1);
+            inputs.push_back(si2);
+            m_ANDs.push_back(new AND(inputs,so));
         }
 
         //NAND section
         values_str.clear();
         bool const nand_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
-        if (nand_result && values_str.size() == 3)
+        if (nand_result)
         {
-            unsigned o = boost::lexical_cast<unsigned>(values_str[0]);
-            unsigned i1 = boost::lexical_cast<unsigned>(values_str[1]);
-            unsigned i2 = boost::lexical_cast<unsigned>(values_str[2]);
-            m_NANDs.push_back(new NAND(i1, i2, o));
+            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            if (!so)
+            {
+                so = new Signal(values_str[0]);
+            }
+            so = new Signal(values_str[0]);
+            vector<Signal*> inputs;
+            BOOST_FOREACH(std::string signalName, values_str)
+            {
+                if (signalName == values_str[0]){
+                    continue;
+                }
+                cout << "SIGNAL NAME: " << signalName << endl;
+                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                if (s)
+                {
+                    inputs.push_back(s);
+                } else {
+                    inputs.push_back(new Signal(signalName));
+                }
+            }
+
+            m_NANDs.push_back(new NAND(inputs,so));
         }
 
         //OR section
@@ -292,7 +317,7 @@ void BenchFileParser::read_body(string inputFile)
 
         //BUF section
         values_str.clear();
-        bool const not_result = qi::parse(line.begin(), line.end(),
+        bool const buf_result = qi::parse(line.begin(), line.end(),
                 qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;

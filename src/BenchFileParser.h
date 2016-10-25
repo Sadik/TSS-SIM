@@ -11,8 +11,7 @@
 #include "NOR.h"
 #include "NOT.h"
 #include "OR.h"
-
-using namespace std;
+#include "Netlist.h"
 
 class BenchFileParser
 {
@@ -38,6 +37,7 @@ private:
     std::vector<NOT*> m_NOTs;
     std::vector<BUF*> m_BUFs;
 private:
+    Netlist* m_netlist;
     unsigned count_inputs(std::string inputFile);
     void parseFile(std::string inputFile);
     void prettyPrintInfos();
