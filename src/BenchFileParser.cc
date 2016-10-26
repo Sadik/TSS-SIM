@@ -105,6 +105,19 @@ void BenchFileParser::read_header(std::string inputFile)
 void BenchFileParser::connectSignals()
 {
 
+    BOOST_FOREACH(Signal* prin, m_netlist->allSignals())
+    {
+        BOOST_FOREACH(Gate* g, m_netlist->allGates())
+        {
+            BOOST_FOREACH(Signal* gatesInput, g->inputs())
+            {
+                if (prin->name() == gatesInput->name())
+                {
+                    cout << "   INPUT: " << prin->name()  << "  OUTPUT: " << g->output()->name() << endl;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -452,6 +465,7 @@ void BenchFileParser::parseFile(std::string inputFile)
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
 //    read_header(inputFile);
     read_body(inputFile);
+    connectSignals();
     prettyPrintInfos();
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
 }

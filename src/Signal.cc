@@ -48,7 +48,7 @@ Gate* Signal::target() const
     return m_dest;
 }
 
-void Signal::setTarget(Gate *target)
+void Signal::setDestiny(Gate *dest)
 {
-    m_dest = target;
+    m_dest = dest;
 }

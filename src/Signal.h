@@ -22,7 +22,7 @@ public:
     void setSource(Gate *source);
 
     Gate *target() const;
-    void setTarget(Gate *target);
+    void setDestiny(Gate *dest);
 
 private:
     std::string m_name;
