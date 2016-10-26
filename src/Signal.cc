@@ -45,10 +45,10 @@ void Signal::setSource(Gate *source)
 
 Gate* Signal::target() const
 {
-    return m_target;
+    return m_dest;
 }
 
 void Signal::setTarget(Gate *target)
 {
-    m_target = target;
+    m_dest = target;
 }

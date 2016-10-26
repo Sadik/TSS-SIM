@@ -24,13 +24,22 @@ private:
 
     std::vector<unsigned> m_inputs;
     std::vector<unsigned> m_outputs;
-private:
     Netlist* m_netlist;
+    bool m_readHeader;
+
+private:
+    void connectSignals();
     unsigned count_inputs(std::string inputFile);
     void parseFile(std::string inputFile);
+    void parsePrims(std::string line);
+    void parseANDs(std::string line);
+    void parseNANDs(std::string line);
+    void parseORs(std::string line);
+    void parseNORs(std::string line);
+    void parseNOTs(std::string line);
+    void parseBUFs(std::string line);
     void prettyPrintInfos();
     void read_body(std::string inputFile);
     void read_gates(std::string line);
     void read_header(std::string inputFile);
-    bool readHeader;
 };

@@ -22,11 +22,12 @@
 
 
 using namespace boost::spirit::classic;
+namespace qi = boost::spirit::qi;
 using namespace std;
 
 BenchFileParser::BenchFileParser()
 {
-    readHeader = false;
+    m_readHeader = false;
     cout << "[INFO] BenchFileParser created" << endl;
     m_netlist = new Netlist();
     parseFile("c17.bench");
@@ -92,7 +93,18 @@ void BenchFileParser::read_header(std::string inputFile)
         }
     }
 
-    readHeader = true;
+    m_readHeader = true;
+}
+
+/**
+ * @brief Here the signals will be connected to each other.
+ * For example if we have a primary input with the name "N10" and an AND gate with an input with the same name,
+ * then the primary inputs destiny member will be the AND gate.
+ *
+ */
+void BenchFileParser::connectSignals()
+{
+
 }
 
 /**
@@ -185,14 +197,233 @@ void BenchFileParser::read_gates(std::string line)
         //cout << "    [DEBUG] m_bufers:" << m_buffers << endl;
     }
 }
-//TODO: accept mixed type instead of number
-//TODO: accept more than two inputs
+
+void BenchFileParser::parsePrims(std::string line)
+{
+    std::vector<std::string> values_str;
+
+    //inputs section
+    bool const i_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
+            values_str);
+
+    if (i_result && values_str.size() == 1)
+    {
+        m_netlist->addPrimaryInput(new Signal(values_str[0], true));
+    }
+
+    //outputs section
+    values_str.clear();
+    bool const o_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [qi::omit["OUTPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
+    if (o_result && values_str.size() == 1)
+    {
+        m_netlist->addPrimaryOutput(new Signal(values_str[0], true));
+    }
+}
+
+void BenchFileParser::parseANDs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //AND section
+    values_str.clear();
+    bool const and_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
+    if (and_result)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        BOOST_FOREACH(std::string signalName, values_str)
+        {
+            if (signalName == values_str[0]){
+                continue;
+            }
+            Signal* s = m_netlist->primaryInputByName(signalName);
+            if (s)
+            {
+                inputs.push_back(s);
+            } else {
+                inputs.push_back(new Signal(signalName));
+            }
+        }
+
+        m_netlist->addAND(new AND(inputs,so));
+    }
+}
+
+void BenchFileParser::parseNANDs(std::string line)
+{
+    std::vector<std::string> values_str;
+
+    //NAND section
+    values_str.clear();
+    bool const nand_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
+    if (nand_result)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        BOOST_FOREACH(std::string signalName, values_str)
+        {
+            if (signalName == values_str[0]){
+                continue;
+            }
+            Signal* s = m_netlist->primaryInputByName(signalName);
+            if (s)
+            {
+                inputs.push_back(s);
+            } else {
+                inputs.push_back(new Signal(signalName));
+            }
+        }
+
+        m_netlist->addNAND(new NAND(inputs,so));
+    }
+}
+
+void BenchFileParser::parseORs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //OR section
+    values_str.clear();
+    bool const or_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
+    if (or_result)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        BOOST_FOREACH(std::string signalName, values_str)
+        {
+            if (signalName == values_str[0]){
+                continue;
+            }
+            Signal* s = m_netlist->primaryInputByName(signalName);
+            if (s)
+            {
+                inputs.push_back(s);
+            } else {
+                inputs.push_back(new Signal(signalName));
+            }
+        }
+
+        m_netlist->addOR(new OR(inputs,so));
+    }
+}
+
+void BenchFileParser::parseNORs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //NOR section
+    values_str.clear();
+    bool const nor_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
+    if (nor_result)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        BOOST_FOREACH(std::string signalName, values_str)
+        {
+            if (signalName == values_str[0]){
+                continue;
+            }
+            Signal* s = m_netlist->primaryInputByName(signalName);
+            if (s)
+            {
+                inputs.push_back(s);
+            } else {
+                inputs.push_back(new Signal(signalName));
+            }
+        }
+
+        m_netlist->addNOR(new NOR(inputs,so));
+    }
+}
+
+void BenchFileParser::parseNOTs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //NOT section
+    values_str.clear();
+    bool const not_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
+    if (not_result && values_str.size() == 2)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        Signal* si = m_netlist->primaryInputByName(values_str[1]);
+        if (!si)
+        {
+            si = new Signal(values_str[1]);
+        }
+        inputs.push_back(si);
+
+        m_netlist->addNOT(new NOT(inputs,so));
+    }
+}
+
+void BenchFileParser::parseBUFs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //BUF section
+    values_str.clear();
+    bool const buf_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
+            values_str);
+//        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
+    if (buf_result && values_str.size() == 2)
+    {
+        Signal* so = m_netlist->primaryOutputByName(values_str[0]);
+        if (!so)
+        {
+            so = new Signal(values_str[0]);
+        }
+        vector<Signal*> inputs;
+        Signal* si = m_netlist->primaryInputByName(values_str[1]);
+        if (!si)
+        {
+            si = new Signal(values_str[1]);
+        }
+        inputs.push_back(si);
+
+        m_netlist->addBUF(new BUF(inputs,so));
+    }
+}
 
 void BenchFileParser::read_body(string inputFile)
 {
     std::cout << "[INFO] reading body" << std::endl;
-
-    namespace qi = boost::spirit::qi;
 
     std::ifstream file(inputFile.c_str());
     std::string line;
@@ -201,202 +432,14 @@ void BenchFileParser::read_body(string inputFile)
         if (boost::starts_with(line, "#")) {
             continue;
         }
-
 //        cout << "[DEBUG] reading line: " << line << endl;
-        std::vector<std::string> values_str;
-
-        //inputs section
-        bool const i_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
-                values_str);
-
-        if (i_result && values_str.size() == 1)
-        {
-            m_netlist->addPrimaryInput(new Signal(values_str[0], true));
-        }
-
-        //outputs section
-        values_str.clear();
-        bool const o_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [qi::omit["OUTPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
-        if (o_result && values_str.size() == 1)
-        {
-            m_netlist->addPrimaryOutput(new Signal(values_str[0], true));
-        }
-
-        //AND section
-        values_str.clear();
-        bool const and_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
-        if (and_result)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            BOOST_FOREACH(std::string signalName, values_str)
-            {
-                if (signalName == values_str[0]){
-                    continue;
-                }
-                Signal* s = m_netlist->primaryInputByName(signalName);
-                if (s)
-                {
-                    inputs.push_back(s);
-                } else {
-                    inputs.push_back(new Signal(signalName));
-                }
-            }
-
-            m_netlist->addAND(new AND(inputs,so));
-        }
-
-        //NAND section
-        values_str.clear();
-        bool const nand_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
-        if (nand_result)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            BOOST_FOREACH(std::string signalName, values_str)
-            {
-                if (signalName == values_str[0]){
-                    continue;
-                }
-                Signal* s = m_netlist->primaryInputByName(signalName);
-                if (s)
-                {
-                    inputs.push_back(s);
-                } else {
-                    inputs.push_back(new Signal(signalName));
-                }
-            }
-
-            m_netlist->addNAND(new NAND(inputs,so));
-        }
-
-        //OR section
-        values_str.clear();
-        bool const or_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
-        if (or_result)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            BOOST_FOREACH(std::string signalName, values_str)
-            {
-                if (signalName == values_str[0]){
-                    continue;
-                }
-                Signal* s = m_netlist->primaryInputByName(signalName);
-                if (s)
-                {
-                    inputs.push_back(s);
-                } else {
-                    inputs.push_back(new Signal(signalName));
-                }
-            }
-
-            m_netlist->addOR(new OR(inputs,so));
-        }
-
-        //NOR section
-        values_str.clear();
-        bool const nor_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
-        if (nor_result)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            BOOST_FOREACH(std::string signalName, values_str)
-            {
-                if (signalName == values_str[0]){
-                    continue;
-                }
-                Signal* s = m_netlist->primaryInputByName(signalName);
-                if (s)
-                {
-                    inputs.push_back(s);
-                } else {
-                    inputs.push_back(new Signal(signalName));
-                }
-            }
-
-            m_netlist->addNOR(new NOR(inputs,so));
-        }
-
-        //NOT section
-        values_str.clear();
-        bool const not_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
-        if (not_result && values_str.size() == 2)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            Signal* si = m_netlist->primaryInputByName(values_str[1]);
-            if (!si)
-            {
-                si = new Signal(values_str[1]);
-            }
-            inputs.push_back(si);
-
-            m_netlist->addNOT(new NOT(inputs,so));
-        }
-
-        //BUF section
-        values_str.clear();
-        bool const buf_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
-                values_str);
-//        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
-        if (buf_result && values_str.size() == 2)
-        {
-            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
-            if (!so)
-            {
-                so = new Signal(values_str[0]);
-            }
-            vector<Signal*> inputs;
-            Signal* si = m_netlist->primaryInputByName(values_str[1]);
-            if (!si)
-            {
-                si = new Signal(values_str[1]);
-            }
-            inputs.push_back(si);
-
-            m_netlist->addBUF(new BUF(inputs,so));
-        }
+        parsePrims(line);
+        parseANDs(line);
+        parseNANDs(line);
+        parseORs(line);
+        parseNORs(line);
+        parseNOTs(line);
+        parseBUFs(line);
     }
 }
 
@@ -415,7 +458,7 @@ void BenchFileParser::parseFile(std::string inputFile)
 
 void BenchFileParser::prettyPrintInfos()
 {
-    if (readHeader)
+    if (m_readHeader)
     {
         cout << "[STAT] " << endl;
         cout << "       inputs:    " << m_inputs_count << endl;

@@ -28,6 +28,6 @@ private:
     std::string m_name;
     bool m_isPrimary;
     Gate* m_source;
-    Gate* m_target;
+    Gate* m_dest;
 
 };
