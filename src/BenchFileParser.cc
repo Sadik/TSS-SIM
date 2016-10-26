@@ -203,7 +203,7 @@ void BenchFileParser::read_body(string inputFile)
 
         //inputs section
         bool const i_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [qi::omit["INPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
                 values_str);
 
         if (i_result && values_str.size() == 1)
@@ -214,7 +214,7 @@ void BenchFileParser::read_body(string inputFile)
         //outputs section
         values_str.clear();
         bool const o_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [qi::omit["OUTPUT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [qi::omit["OUTPUT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
         if (o_result && values_str.size() == 1)
@@ -225,7 +225,7 @@ void BenchFileParser::read_body(string inputFile)
         //AND section
         values_str.clear();
         bool const and_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "AND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
         if (and_result)
@@ -256,7 +256,7 @@ void BenchFileParser::read_body(string inputFile)
         //NAND section
         values_str.clear();
         bool const nand_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NAND" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
         if (nand_result)
@@ -287,7 +287,7 @@ void BenchFileParser::read_body(string inputFile)
         //OR section
         values_str.clear();
         bool const or_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "OR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
         if (or_result)
@@ -318,7 +318,7 @@ void BenchFileParser::read_body(string inputFile)
         //NOR section
         values_str.clear();
         bool const nor_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::digit % qi::char_(",") >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOR" >> qi::char_("(")] >> *qi::alnum % qi::char_(",") >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
         if (nor_result)
@@ -349,7 +349,7 @@ void BenchFileParser::read_body(string inputFile)
         //NOT section
         values_str.clear();
         bool const not_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "NOT" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "NOT" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
         if (not_result && values_str.size() == 2)
@@ -373,7 +373,7 @@ void BenchFileParser::read_body(string inputFile)
         //BUF section
         values_str.clear();
         bool const buf_result = qi::parse(line.begin(), line.end(),
-                qi::skip(qi::space) [*qi::digit >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::digit >> qi::omit[qi::char_(",")] >> *qi::digit >> qi::omit[qi::char_(")")]],
+                qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "BUF" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
                 values_str);
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
         if (buf_result && values_str.size() == 2)
