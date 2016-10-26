@@ -230,7 +230,7 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
         if (and_result)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
@@ -241,7 +241,7 @@ void BenchFileParser::read_body(string inputFile)
                 if (signalName == values_str[0]){
                     continue;
                 }
-                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                Signal* s = m_netlist->primaryInputByName(signalName);
                 if (s)
                 {
                     inputs.push_back(s);
@@ -261,7 +261,7 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
         if (nand_result)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
@@ -272,7 +272,7 @@ void BenchFileParser::read_body(string inputFile)
                 if (signalName == values_str[0]){
                     continue;
                 }
-                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                Signal* s = m_netlist->primaryInputByName(signalName);
                 if (s)
                 {
                     inputs.push_back(s);
@@ -292,7 +292,7 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
         if (or_result)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
@@ -303,7 +303,7 @@ void BenchFileParser::read_body(string inputFile)
                 if (signalName == values_str[0]){
                     continue;
                 }
-                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                Signal* s = m_netlist->primaryInputByName(signalName);
                 if (s)
                 {
                     inputs.push_back(s);
@@ -323,7 +323,7 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
         if (nor_result)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
@@ -334,7 +334,7 @@ void BenchFileParser::read_body(string inputFile)
                 if (signalName == values_str[0]){
                     continue;
                 }
-                Signal* s = m_netlist->getPrimaryInputByName(signalName);
+                Signal* s = m_netlist->primaryInputByName(signalName);
                 if (s)
                 {
                     inputs.push_back(s);
@@ -354,13 +354,13 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
         if (not_result && values_str.size() == 2)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
             }
             vector<Signal*> inputs;
-            Signal* si = m_netlist->getPrimaryInputByName(values_str[1]);
+            Signal* si = m_netlist->primaryInputByName(values_str[1]);
             if (!si)
             {
                 si = new Signal(values_str[1]);
@@ -378,13 +378,13 @@ void BenchFileParser::read_body(string inputFile)
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
         if (buf_result && values_str.size() == 2)
         {
-            Signal* so = m_netlist->getPrimaryOutputByName(values_str[0]);
+            Signal* so = m_netlist->primaryOutputByName(values_str[0]);
             if (!so)
             {
                 so = new Signal(values_str[0]);
             }
             vector<Signal*> inputs;
-            Signal* si = m_netlist->getPrimaryInputByName(values_str[1]);
+            Signal* si = m_netlist->primaryInputByName(values_str[1]);
             if (!si)
             {
                 si = new Signal(values_str[1]);
@@ -422,19 +422,19 @@ void BenchFileParser::prettyPrintInfos()
     cout << "       NOR Gates: " << m_NORs_count << endl;
     cout << "       buffers:   " << m_buffers_count << endl;
 
-    if (m_inputs.size() >= 1){
+    if (m_netlist->primaryInputs().size() >= 1){
         cout << "       inputs: ";
-        BOOST_FOREACH(unsigned u, m_inputs)
+        BOOST_FOREACH(Signal* s, m_netlist->primaryInputs())
         {
-            cout << u << " ";
+            cout << s->name() << " ";
         }
         cout << endl;
     }
-    if (m_outputs.size() >= 1){
+    if (m_netlist->primaryOutputs().size() >= 1){
         cout << "       outputs: ";
-        BOOST_FOREACH(unsigned u, m_outputs)
+        BOOST_FOREACH(Signal* s, m_netlist->primaryOutputs())
         {
-            cout << u << " ";
+            cout << s->name() << " ";
         }
         cout << endl;
     }

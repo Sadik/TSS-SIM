@@ -19,8 +19,8 @@ public:
     std::vector<Signal*> primaryOutputs() const;
     void addPrimaryInput(Signal* s);
     void addPrimaryOutput(Signal* s);
-    Signal* getPrimaryInputByName(std::string name);
-    Signal* getPrimaryOutputByName(std::string name);
+    Signal* primaryInputByName(std::string name);
+    Signal* primaryOutputByName(std::string name);
     std::vector<AND *> ANDs() const;
     std::vector<BUF *> BUFs() const;
     std::vector<NAND *> NANDs() const;

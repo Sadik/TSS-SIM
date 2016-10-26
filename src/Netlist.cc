@@ -27,7 +27,7 @@ void Netlist::addPrimaryOutput(Signal* s)
     m_primaryOutputs.push_back(s);
 }
 
-Signal *Netlist::getPrimaryInputByName(std::string name)
+Signal *Netlist::primaryInputByName(std::string name)
 {
     BOOST_FOREACH(Signal* s, m_primaryInputs)
     {
@@ -37,7 +37,7 @@ Signal *Netlist::getPrimaryInputByName(std::string name)
     return nullptr;
 }
 
-Signal *Netlist::getPrimaryOutputByName(std::string name)
+Signal *Netlist::primaryOutputByName(std::string name)
 {
     BOOST_FOREACH(Signal* s, m_primaryOutputs)
     {
