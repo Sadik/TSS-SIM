@@ -32,4 +32,5 @@ private:
     void read_body(std::string inputFile);
     void read_gates(std::string line);
     void read_header(std::string inputFile);
+    bool readHeader;
 };

@@ -7,7 +7,7 @@ NOT::NOT(std::vector<Signal *> inputs, Signal *output)
 
 void NOT::NOT::prettyPrint()
 {
-    std::cout << "[DEBUG]: inputs of this NOT: ";
+    std::cout << "[DEBUG] inputs of this NOT: ";
     BOOST_FOREACH(Signal* s, inputs())
     {
         std::cout << s->name() << " ";

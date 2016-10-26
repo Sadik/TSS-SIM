@@ -7,7 +7,7 @@ NOR::NOR(std::vector<Signal *> inputs, Signal *output)
 
 void NOR::NOR::prettyPrint()
 {
-    std::cout << "[DEBUG]: inputs of this NOR: ";
+    std::cout << "[DEBUG] inputs of this NOR: ";
     BOOST_FOREACH(Signal* s, inputs())
     {
         std::cout << s->name() << " ";

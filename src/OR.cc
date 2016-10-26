@@ -7,7 +7,7 @@ OR::OR(std::vector<Signal *> inputs, Signal *output)
 
 void OR::OR::prettyPrint()
 {
-    std::cout << "[DEBUG]: inputs of this OR: ";
+    std::cout << "[DEBUG] inputs of this OR: ";
     BOOST_FOREACH(Signal* s, inputs())
     {
         std::cout << s->name() << " ";

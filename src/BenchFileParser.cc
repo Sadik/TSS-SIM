@@ -26,6 +26,7 @@ using namespace std;
 
 BenchFileParser::BenchFileParser()
 {
+    readHeader = false;
     cout << "[INFO] BenchFileParser created" << endl;
     m_netlist = new Netlist();
     parseFile("c17.bench");
@@ -38,6 +39,7 @@ BenchFileParser::BenchFileParser()
  */
 void BenchFileParser::read_header(std::string inputFile)
 {
+    std::cout << "[INFO] reading header" << std::endl;
     namespace qi = boost::spirit::qi;
 
     std::ifstream file(inputFile.c_str());
@@ -89,6 +91,8 @@ void BenchFileParser::read_header(std::string inputFile)
             read_gates(line);
         }
     }
+
+    readHeader = true;
 }
 
 /**
@@ -403,7 +407,6 @@ void BenchFileParser::read_body(string inputFile)
 void BenchFileParser::parseFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
-    cout << "[INFO] reading header" << endl;
 //    read_header(inputFile);
     read_body(inputFile);
     prettyPrintInfos();
@@ -412,18 +415,21 @@ void BenchFileParser::parseFile(std::string inputFile)
 
 void BenchFileParser::prettyPrintInfos()
 {
-    cout << "[STAT] " << endl;
-    cout << "       inputs:    " << m_inputs_count << endl;
-    cout << "       outputs:   " << m_outputs_count << endl;
-    cout << "       inverters: " << m_inverters_count << endl;
-    cout << "       AND Gates: " << m_ANDs_count << endl;
-    cout << "       OR Gates:  " << m_ORs_count << endl;
-    cout << "       NAND Gates:" << m_NANDs_count << endl;
-    cout << "       NOR Gates: " << m_NORs_count << endl;
-    cout << "       buffers:   " << m_buffers_count << endl;
+    if (readHeader)
+    {
+        cout << "[STAT] " << endl;
+        cout << "       inputs:    " << m_inputs_count << endl;
+        cout << "       outputs:   " << m_outputs_count << endl;
+        cout << "       inverters: " << m_inverters_count << endl;
+        cout << "       AND Gates: " << m_ANDs_count << endl;
+        cout << "       OR Gates:  " << m_ORs_count << endl;
+        cout << "       NAND Gates:" << m_NANDs_count << endl;
+        cout << "       NOR Gates: " << m_NORs_count << endl;
+        cout << "       buffers:   " << m_buffers_count << endl;
+    }
 
     if (m_netlist->primaryInputs().size() >= 1){
-        cout << "       inputs: ";
+        cout << "[STAT]    inputs: ";
         BOOST_FOREACH(Signal* s, m_netlist->primaryInputs())
         {
             cout << s->name() << " ";
@@ -431,7 +437,7 @@ void BenchFileParser::prettyPrintInfos()
         cout << endl;
     }
     if (m_netlist->primaryOutputs().size() >= 1){
-        cout << "       outputs: ";
+        cout << "[STAT]    outputs: ";
         BOOST_FOREACH(Signal* s, m_netlist->primaryOutputs())
         {
             cout << s->name() << " ";

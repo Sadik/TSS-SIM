@@ -7,7 +7,7 @@ AND::AND(std::vector<Signal *> inputs, Signal *output)
 
 void AND::AND::prettyPrint()
 {
-    std::cout << "[DEBUG]: inputs of this AND: ";
+    std::cout << "[DEBUG] inputs of this AND: ";
     BOOST_FOREACH(Signal* s, inputs())
     {
         std::cout << s->name() << " ";

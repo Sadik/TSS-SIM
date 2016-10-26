@@ -7,7 +7,7 @@ BUF::BUF(std::vector<Signal *> inputs, Signal *output)
 
 void BUF::BUF::prettyPrint()
 {
-    std::cout << "[DEBUG]: inputs of this BUF: ";
+    std::cout << "[DEBUG] inputs of this BUF: ";
     BOOST_FOREACH(Signal* s, inputs())
     {
         std::cout << s->name() << " ";
