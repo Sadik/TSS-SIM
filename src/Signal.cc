@@ -11,6 +11,7 @@ Signal::Signal(std::string name, bool isPrimary)
 {
     m_name = name;
     m_isPrimary = isPrimary;
+    m_value = 0;
 }
 
 bool Signal::isPrimary()
@@ -43,7 +44,7 @@ void Signal::setSource(Gate *source)
     m_source = source;
 }
 
-Gate* Signal::target() const
+Gate* Signal::destiny() const
 {
     return m_dest;
 }
@@ -51,4 +52,14 @@ Gate* Signal::target() const
 void Signal::setDestiny(Gate *dest)
 {
     m_dest = dest;
+}
+
+bool Signal::value() const
+{
+    return m_value;
+}
+
+void Signal::setValue(bool value)
+{
+    m_value = value;
 }

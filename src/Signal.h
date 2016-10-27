@@ -3,6 +3,7 @@
 #include "Gate.h"
 
 #include <string>
+#include <bitset>
 
 class Gate;
 
@@ -21,13 +22,17 @@ public:
     Gate *source() const;
     void setSource(Gate *source);
 
-    Gate *target() const;
+    Gate *destiny() const;
     void setDestiny(Gate *dest);
+
+    bool value() const;
+    void setValue(bool value);
 
 private:
     std::string m_name;
     bool m_isPrimary;
     Gate* m_source;
     Gate* m_dest;
+    bool m_value;
 
 };
