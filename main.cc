@@ -10,7 +10,12 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    auto parser = new BenchFileParser();
+    if (argc < 2 || argc > 3)
+    {
+        cout << "wrong arguments" << endl;
+        exit(-1);
+    }
+    auto parser = new BenchFileParser(argv[1]);
 
    /* BOOST_FOREACH( char ch, hello )
     {

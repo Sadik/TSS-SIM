@@ -10,7 +10,7 @@
 class BenchFileParser
 {
 public:
-    BenchFileParser();
+    BenchFileParser(std::__cxx11::string fileName);
 private:
     unsigned m_inputs_count;
     unsigned m_outputs_count;

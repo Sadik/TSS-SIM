@@ -25,12 +25,12 @@ using namespace boost::spirit::classic;
 namespace qi = boost::spirit::qi;
 using namespace std;
 
-BenchFileParser::BenchFileParser()
+BenchFileParser::BenchFileParser(std::string fileName)
 {
     m_readHeader = false;
     cout << "[INFO] BenchFileParser created" << endl;
     m_netlist = new Netlist();
-    parseFile("c17.bench");
+    parseFile(fileName);
 
 }
 
@@ -105,20 +105,8 @@ void BenchFileParser::read_header(std::string inputFile)
 void BenchFileParser::connectSignals()
 {
 
-    BOOST_FOREACH(Signal* prin, m_netlist->allSignals())
-    {
-        BOOST_FOREACH(Gate* g, m_netlist->allGates())
-        {
-            BOOST_FOREACH(Signal* gatesInput, g->inputs())
-            {
-                if (prin->name() == gatesInput->name())
-                {
-                    cout << "   INPUT: " << prin->name()  << "  OUTPUT: " << g->output()->name() << endl;
-                }
-            }
-        }
-    }
 }
+
 
 /**
  * @brief function is called by read_header. It counts the number of ANDs, NANDs, ORs, NORs and buffers specified in the file header
