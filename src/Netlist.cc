@@ -7,6 +7,35 @@ Netlist::Netlist()
 
 }
 
+void Netlist::compute(std::vector<boost::dynamic_bitset<>> testPattern)
+{
+    if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
+    {
+        std::cout << "[WRN] tried to compute before parsing! Return." << std::endl;
+        return;
+    }
+
+//    std::cout<<"bit is of type: "<<typeid(testPattern[0][0]).name()<<std::endl;
+    boost::dynamic_bitset<> test1 = testPattern[0];
+    for (unsigned i = 0; i<m_primaryInputs.size(); i++)
+    {
+        m_primaryInputs[i]->setValue((bool)test1[i]);
+    }
+
+    std::cout << "INPUT0: " << m_primaryInputs[0]->value() << std::endl;
+    std::cout << "INPUT1: " << m_primaryInputs[1]->value() << std::endl;
+    std::cout << "INPUT2: " << m_primaryInputs[2]->value() << std::endl;
+    std::cout << "INPUT3: " << m_primaryInputs[3]->value() << std::endl;
+    std::cout << "INPUT4: " << m_primaryInputs[4]->value() << std::endl;
+
+
+//    BOOST_FOREACH(boost::dynamic_bitset<> bits, testPattern)
+//    {
+
+//    }
+
+}
+
 std::vector<Signal*> Netlist::primaryInputs() const
 {
     return m_primaryInputs;

@@ -5,12 +5,15 @@
 #include <string>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "Netlist.h"
 
 class BenchFileParser
 {
 public:
-    BenchFileParser(std::__cxx11::string fileName);
+    BenchFileParser(std::string benchFile, std::string patternFile);
+
 private:
     unsigned m_inputs_count;
     unsigned m_outputs_count;
@@ -26,11 +29,12 @@ private:
     std::vector<unsigned> m_outputs;
     Netlist* m_netlist;
     bool m_readHeader;
+    std::vector<boost::dynamic_bitset<>> m_testPattern;
 
 private:
     void connectSignals();
     unsigned count_inputs(std::string inputFile);
-    void parseFile(std::string inputFile);
+    void parseBenchFile(std::string inputFile);
     void parsePrims(std::string line);
     void parseANDs(std::string line);
     void parseNANDs(std::string line);
@@ -42,4 +46,7 @@ private:
     void read_body(std::string inputFile);
     void read_gates(std::string line);
     void read_header(std::string inputFile);
+    void readPatternFile(std::string patternFile);
+
+
 };

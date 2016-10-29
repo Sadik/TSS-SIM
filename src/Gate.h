@@ -17,7 +17,7 @@ public:
     std::vector<Signal*> inputs() const;
     Signal *output() const;
 
-private:
+protected:
     std::vector<Signal*> m_inputs;
     Signal* m_output;
 };

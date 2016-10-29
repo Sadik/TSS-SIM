@@ -9,6 +9,8 @@
 
 #include "BenchFileParser.h"
 
+#include <algorithm>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
@@ -25,13 +27,14 @@ using namespace boost::spirit::classic;
 namespace qi = boost::spirit::qi;
 using namespace std;
 
-BenchFileParser::BenchFileParser(std::string fileName)
+BenchFileParser::BenchFileParser(std::string benchFile, string patternFile)
 {
     m_readHeader = false;
     cout << "[INFO] BenchFileParser created" << endl;
     m_netlist = new Netlist();
-    parseFile(fileName);
-
+    parseBenchFile(benchFile);
+    readPatternFile(patternFile);
+    m_netlist->compute(m_testPattern);
 }
 
 /**
@@ -96,6 +99,37 @@ void BenchFileParser::read_header(std::string inputFile)
     m_readHeader = true;
 }
 
+void BenchFileParser::readPatternFile(string patternFile)
+{
+    std::ifstream file(patternFile.c_str());
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (boost::starts_with(line, "#")){
+            continue;
+        }
+
+        std::string testCase;
+
+        bool const patternFound = qi::parse(line.begin(), line.end(),
+                *qi::digit,
+                testCase);
+//        std::cout << "patternFound: " << std::boolalpha << patternFound << std::endl;
+        if (patternFound)
+        {
+            std::reverse(testCase.begin(), testCase.end());
+            boost::dynamic_bitset<> bits(testCase);
+            m_testPattern.push_back(bits);
+//            std::cout << "testCase: " << testCase << std::endl;
+//            std::cout << "    read bits: " << bits << std::endl;
+//            std::cout << "    size: " << bits.size() << std::endl;
+//            std::cout << "    " << bits.any() << '\n';
+//            std::cout << "    " << bits.none() << '\n';
+        }
+    }
+}
+
 /**
  * @brief Here the signals will be connected to each other.
  * For example if we have a primary input with the name "N10" and an AND gate with an input with the same name,
@@ -104,7 +138,11 @@ void BenchFileParser::read_header(std::string inputFile)
  */
 void BenchFileParser::connectSignals()
 {
-
+    std::cout << "[INFO] connecting signals" << std::endl;
+    BOOST_FOREACH(NAND* nand, m_netlist->NANDs())
+    {
+        std::cout << nand->compute() << std::endl;
+    }
 }
 
 
@@ -448,12 +486,11 @@ void BenchFileParser::read_body(string inputFile)
  * @brief parses file specified by inputFile
  * @param inputFile file name
  */
-void BenchFileParser::parseFile(std::string inputFile)
+void BenchFileParser::parseBenchFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
 //    read_header(inputFile);
     read_body(inputFile);
-    connectSignals();
     prettyPrintInfos();
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
 }

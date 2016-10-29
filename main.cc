@@ -10,12 +10,12 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    if (argc < 2 || argc > 3)
+    if (argc < 3 || argc > 3)
     {
-        cout << "wrong arguments" << endl;
+        cout << "usage: TSS-SIM bench-file pattern-file" << endl;
         exit(-1);
     }
-    auto parser = new BenchFileParser(argv[1]);
+    auto parser = new BenchFileParser(argv[1], argv[2]);
 
    /* BOOST_FOREACH( char ch, hello )
     {

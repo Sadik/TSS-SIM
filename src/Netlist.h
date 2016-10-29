@@ -11,16 +11,21 @@
 #include "OR.h"
 #include "Signal.h"
 
+#include <boost/dynamic_bitset.hpp>
+
 class Netlist
 {
 public:
     Netlist();
+    void compute(std::vector<boost::dynamic_bitset<> > testPattern);
+
     std::vector<Signal*> primaryInputs() const;
     std::vector<Signal*> primaryOutputs() const;
     void addPrimaryInput(Signal* s);
     void addPrimaryOutput(Signal* s);
     Signal* primaryInputByName(std::string name);
     Signal* primaryOutputByName(std::string name);
+
     std::vector<AND *> ANDs() const;
     std::vector<BUF *> BUFs() const;
     std::vector<NAND *> NANDs() const;
