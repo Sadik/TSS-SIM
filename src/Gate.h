@@ -14,10 +14,17 @@ public:
     Gate(std::vector<Signal*> inputs, Signal* output);
     void addInput(Signal* s);
     void addOutput(Signal* s);
+    bool allInputsSet() const;
     std::vector<Signal*> inputs() const;
     Signal *output() const;
+    bool outputSet() const;
+    bool hasPrimOutput() const;
+    virtual bool compute();
+    void setHasPrimOutput(bool hasPrimOutput);
 
 protected:
     std::vector<Signal*> m_inputs;
     Signal* m_output;
+private:
+    bool m_hasPrimOutput;
 };

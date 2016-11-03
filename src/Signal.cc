@@ -12,6 +12,7 @@ Signal::Signal(std::string name, bool isPrimary)
     m_name = name;
     m_isPrimary = isPrimary;
     m_value = 0;
+    m_init_set = 0;
 }
 
 bool Signal::isPrimary()
@@ -62,4 +63,15 @@ bool Signal::value() const
 void Signal::setValue(bool value)
 {
     m_value = value;
+    m_init_set = true;
+}
+
+bool Signal::initSet() const
+{
+    return m_init_set;
+}
+
+void Signal::setInitSet(bool init_set)
+{
+    m_init_set = init_set;
 }

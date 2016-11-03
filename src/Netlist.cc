@@ -1,13 +1,32 @@
 #include "Netlist.h"
 
 #include <boost/foreach.hpp>
+#include <typeinfo>
 
 Netlist::Netlist()
 {
 
 }
 
-void Netlist::compute(std::vector<boost::dynamic_bitset<>> testPattern)
+/**
+ * @brief
+ * @param testPattern all test pattern lines
+ */
+void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
+{
+    BOOST_FOREACH(Gate* g, allGates)
+    {
+        BOOST_FOREACH(Signal*s, primaryOutputs())
+        {
+            if (s->name() == g->output()->name())
+            {
+                g->setHasPrimOutput(true);
+            }
+        }
+    }
+}
+
+void Netlist::compute(const std::vector<boost::dynamic_bitset<> > &testPattern)
 {
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
@@ -15,30 +34,118 @@ void Netlist::compute(std::vector<boost::dynamic_bitset<>> testPattern)
         return;
     }
 
-//    std::cout<<"bit is of type: "<<typeid(testPattern[0][0]).name()<<std::endl;
-    compute(testPattern.at(0));
+    assignPrimaryInputValues(testPattern.at(1));
 
+    std::vector <Gate*> allGates;
+    std::vector <Signal*> internalSignals;
+    allGates.insert( allGates.end(), m_ANDs.begin(), m_ANDs.end() );
+    allGates.insert( allGates.end(), m_ORs.begin(), m_ORs.end() );
+    allGates.insert( allGates.end(), m_NORs.begin(), m_NORs.end() );
+    allGates.insert( allGates.end(), m_NOTs.begin(), m_NOTs.end() );
+    allGates.insert( allGates.end(), m_BUFs.begin(), m_BUFs.end() );
+    allGates.insert( allGates.end(), m_NANDs.begin(), m_NANDs.end() );
 
+    //set primary outputs
+    prepareGatesWithPrimOutput(allGates);
+
+    while(!allGates.empty())
+    {
+
+        BOOST_REVERSE_FOREACH(Gate* currentGate, allGates)
+        {
+//            std::cout << "remaining gates: " << std::endl;
+//            BOOST_FOREACH(Gate* r, allGates)
+//            {
+//                std::cout << "  " << r->output()->name();
+//            }
+
+//            std::cout << std::endl;
+//            std::cout << "################################" << std::endl;
+//            std::cout << "remaining gates: " << allGates.size() << std::endl;
+//            std::cout << "current gate: " << currentGate->output()->name() << std::endl;
+//            std::cout << "gates inputs are set: " << currentGate->allInputsSet() << std::endl;
+            if (currentGate->allInputsSet())
+            {
+
+                currentGate->output()->setValue(currentGate->compute()); //TODO: necessary?
+//                std::cout << "    handling gate with output " << currentGate->output()->name() << "("<< currentGate->output()->value() << ")" << std::endl;
+
+                //alle inputs aller gates absuchen und input value speichert
+                BOOST_FOREACH(Gate* g, allGates)
+                {
+                    if (g->output()->name() == currentGate->output()->name())
+                        continue;
+                    BOOST_FOREACH(Signal* s, g->inputs())
+                    {
+                        if (s->isPrimary())
+                            continue;
+                        if (s->name() == currentGate->output()->name())
+                        {
+//                            std::cout <<  "    output " << currentGate->output()->name() << " is input of gate " <<  g->output()->name() << std::endl;
+                            s->setValue(currentGate->output()->value());
+                        }
+                    }
+                }
+
+//                BOOST_FOREACH(Signal* gateInput, currentGate->inputs())
+//                {
+//                    std::cout << "    input: " << gateInput->name() << " " << gateInput->value() << " " << gateInput->initSet() << std::endl;
+//                }
+
+//                allGates.pop_back(); //TODO: WRONG!
+
+                auto it = std::find(allGates.begin(), allGates.end(), currentGate);
+                if (it != allGates.end())
+                {
+                    allGates.erase(it);
+                }
+            }
+        }
+    }
+
+    BOOST_FOREACH(Gate* g, allGates)
+    {
+        if (g->hasPrimOutput())
+        {
+            BOOST_FOREACH(Signal* s, primaryOutputs())
+            {
+                if (g->output()->name() == s->name())
+                {
+                    s->setValue(g->output()->value());
+                }
+            }
+        }
+    }
+
+    BOOST_FOREACH(Signal*s, primaryOutputs())
+    {
+        std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
+    }
 }
 
-void Netlist::compute(boost::dynamic_bitset<> testPattern)
+/**
+ * @brief assigns values of test pattern to primary inputs
+ * @param testPattern one test pattern line, i.e. "10010"
+ */
+void Netlist::assignPrimaryInputValues(const boost::dynamic_bitset<> &testPattern)
 {
     for (unsigned i = 0; i<m_primaryInputs.size(); i++)
     {
         m_primaryInputs[i]->setValue((bool)testPattern[i]);
+        m_primaryInputs[i]->setInitSet(true); //TODO: do we need this init_set bool?
     }
 
-    std::cout << "INPUT0: " << m_primaryInputs[0]->name() <<  " = " << m_primaryInputs[0]->value() << std::endl;
-    std::cout << "INPUT1: " << m_primaryInputs[1]->name() <<  " = " << m_primaryInputs[1]->value() << std::endl;
-    std::cout << "INPUT2: " << m_primaryInputs[2]->name() <<  " = " << m_primaryInputs[2]->value() << std::endl;
-    std::cout << "INPUT3: " << m_primaryInputs[3]->name() <<  " = " << m_primaryInputs[3]->value() << std::endl;
-    std::cout << "INPUT4: " << m_primaryInputs[4]->name() <<  " = " << m_primaryInputs[4]->value() << std::endl;
-
-
-//    BOOST_FOREACH(boost::dynamic_bitset<> bits, testPattern)
-//    {
-
-//    }
+    std::cout << "INPUT: ";
+    BOOST_FOREACH(Signal* inp, m_primaryInputs)
+    {
+        std::cout << inp->value();
+    }
+    std::cout << std::endl;
+//    std::cout << "INPUT0: " << m_primaryInputs[0]->name() <<  " = " << m_primaryInputs[0]->value() << std::endl;
+//    std::cout << "INPUT1: " << m_primaryInputs[1]->name() <<  " = " << m_primaryInputs[1]->value() << std::endl;
+//    std::cout << "INPUT2: " << m_primaryInputs[2]->name() <<  " = " << m_primaryInputs[2]->value() << std::endl;
+//    std::cout << "INPUT3: " << m_primaryInputs[3]->name() <<  " = " << m_primaryInputs[3]->value() << std::endl;
+//    std::cout << "INPUT4: " << m_primaryInputs[4]->name() <<  " = " << m_primaryInputs[4]->value() << std::endl;
 }
 
 std::vector<Signal*> Netlist::primaryInputs() const

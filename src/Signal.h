@@ -28,11 +28,15 @@ public:
     bool value() const;
     void setValue(bool value);
 
+    bool initSet() const;
+    void setInitSet(bool init_set);
+
 private:
     std::string m_name;
     bool m_isPrimary;
     Gate* m_source;
     Gate* m_dest;
     bool m_value;
+    bool m_init_set;
 
 };

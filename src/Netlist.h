@@ -17,8 +17,8 @@ class Netlist
 {
 public:
     Netlist();
-    void compute(std::vector<boost::dynamic_bitset<> > testPattern);
-    void compute(boost::dynamic_bitset<> testPattern);
+    void compute(const std::vector<boost::dynamic_bitset<> > &testPattern);
+    void assignPrimaryInputValues(const boost::dynamic_bitset<> &testPattern);
 
     std::vector<Signal*> primaryInputs() const;
     std::vector<Signal*> primaryOutputs() const;
@@ -49,4 +49,5 @@ private:
     std::vector<NOR*> m_NORs;
     std::vector<NOT*> m_NOTs;
     std::vector<BUF*> m_BUFs;
+    void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
 };

@@ -21,13 +21,13 @@ bool NAND::compute()
     bool o = m_inputs[0]->value();
     BOOST_FOREACH(Signal* s, m_inputs)
     {
-        std::cout << "    " << o << " & " << s->value() << std::endl;
-        bool o = o & s->value();
+//        std::cout << "    " << o << " & " << s->value() << std::endl;
+        bool o = o && s->value();
     }
 
-    std::cout << "o is " << std::boolalpha << ~o << std::endl;
+//    std::cout << "o is " << std::boolalpha << !o << std::endl;
 
-    m_output->setValue(~o);
+    m_output->setValue(!o);
     return m_output->value();
 }
 
