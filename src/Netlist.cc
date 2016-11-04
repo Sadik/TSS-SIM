@@ -26,7 +26,7 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
     }
 }
 
-void Netlist::compute(const std::vector<boost::dynamic_bitset<> > &testPattern)
+void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
@@ -34,7 +34,7 @@ void Netlist::compute(const std::vector<boost::dynamic_bitset<> > &testPattern)
         return;
     }
 
-    assignPrimaryInputValues(testPattern.at(1));
+    assignPrimaryInputValues(testPattern);
 
     std::vector <Gate*> allGates;
     std::vector <Signal*> internalSignals;
@@ -92,8 +92,6 @@ void Netlist::compute(const std::vector<boost::dynamic_bitset<> > &testPattern)
 //                    std::cout << "    input: " << gateInput->name() << " " << gateInput->value() << " " << gateInput->initSet() << std::endl;
 //                }
 
-//                allGates.pop_back(); //TODO: WRONG!
-
                 auto it = std::find(allGates.begin(), allGates.end(), currentGate);
                 if (it != allGates.end())
                 {
@@ -120,6 +118,44 @@ void Netlist::compute(const std::vector<boost::dynamic_bitset<> > &testPattern)
     BOOST_FOREACH(Signal*s, primaryOutputs())
     {
         std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
+    }
+
+    resetValues();
+}
+
+void::Netlist::resetValues()
+{
+    BOOST_FOREACH(Signal* s, m_primaryInputs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Signal* s, m_primaryOutputs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_ANDs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_NANDs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_ORs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_NORs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_NOTs)
+    {
+        s->reset();
+    }
+    BOOST_FOREACH(Gate* s, m_BUFs)
+    {
+        s->reset();
     }
 }
 

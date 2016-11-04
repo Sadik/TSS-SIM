@@ -64,3 +64,11 @@ void Gate::setHasPrimOutput(bool hasPrimOutput)
 {
     m_hasPrimOutput = hasPrimOutput;
 }
+
+void Gate::reset()
+{
+    BOOST_FOREACH(Signal* s, m_inputs)
+    {
+        s->reset();
+    }
+}

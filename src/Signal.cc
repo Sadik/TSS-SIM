@@ -75,3 +75,9 @@ void Signal::setInitSet(bool init_set)
 {
     m_init_set = init_set;
 }
+
+void Signal::reset()
+{
+    m_value = 0;
+    m_init_set = false;
+}

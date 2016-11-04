@@ -34,11 +34,11 @@ BenchFileParser::BenchFileParser(std::string benchFile, string patternFile)
     m_netlist = new Netlist();
     parseBenchFile(benchFile);
     readPatternFile(patternFile);
-    m_netlist->compute(m_testPattern);
-//    BOOST_FOREACH(auto pattern, m_testPattern)
-//    {
-//        m_netlist->compute(pattern);
-//    }
+    //m_netlist->compute(m_testPattern);
+    BOOST_FOREACH(auto pattern, m_testPattern)
+    {
+        m_netlist->compute(pattern);
+    }
 
 }
 

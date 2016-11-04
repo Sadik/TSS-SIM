@@ -31,6 +31,8 @@ public:
     bool initSet() const;
     void setInitSet(bool init_set);
 
+    void reset();
+
 private:
     std::string m_name;
     bool m_isPrimary;

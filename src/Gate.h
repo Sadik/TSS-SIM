@@ -21,6 +21,7 @@ public:
     bool hasPrimOutput() const;
     virtual bool compute();
     void setHasPrimOutput(bool hasPrimOutput);
+    void reset();
 
 protected:
     std::vector<Signal*> m_inputs;
