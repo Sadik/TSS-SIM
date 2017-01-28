@@ -35,6 +35,8 @@ BenchFileParser::BenchFileParser(std::string benchFile, string patternFile)
     parseBenchFile(benchFile);
     readPatternFile(patternFile);
     //m_netlist->compute(m_testPattern);
+
+    //This is actually part of the simulation and shouldn't be part of this class
     BOOST_FOREACH(auto pattern, m_testPattern)
     {
         m_netlist->compute(pattern);
@@ -242,6 +244,12 @@ void BenchFileParser::read_gates(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parsePrims
+ * store primary inputs and primary outputs in m_netlist->m_primaryInputs and m_netlist->m_primaryOutputs
+ *
+ * @param line
+ */
 void BenchFileParser::parsePrims(std::string line)
 {
     std::vector<std::string> values_str;
@@ -268,6 +276,15 @@ void BenchFileParser::parsePrims(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseANDs
+ * checks if line specifies an AND gate.
+ * stores the AND gate with it's inputs and outputs.
+ * Also has a bit optimization here: If the AND's input is primaryInput or primaryOutput, store this primary signal instead of createing a new one.
+ * This assumes that primary inputs and outputs have already been read and stored. We don't have this assumption for any other type.
+ *
+ * @param line
+ */
 void BenchFileParser::parseANDs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -287,6 +304,7 @@ void BenchFileParser::parseANDs(std::string line)
         vector<Signal*> inputs;
         BOOST_FOREACH(std::string signalName, values_str)
         {
+            //the first value stored in values_str is the output signal.
             if (signalName == values_str[0]){
                 continue;
             }
@@ -303,6 +321,11 @@ void BenchFileParser::parseANDs(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseNANDs
+ * equivalent to parseANDs
+ * @param line
+ */
 void BenchFileParser::parseNANDs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -339,6 +362,11 @@ void BenchFileParser::parseNANDs(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseORs
+ * equivalent to parseANDs
+ * @param line
+ */
 void BenchFileParser::parseORs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -374,6 +402,11 @@ void BenchFileParser::parseORs(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseNORs
+ * equivalent to parseANDs
+ * @param line
+ */
 void BenchFileParser::parseNORs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -409,6 +442,11 @@ void BenchFileParser::parseNORs(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseNOTs
+ * equivalent to parseANDs
+ * @param line
+ */
 void BenchFileParser::parseNOTs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -437,6 +475,11 @@ void BenchFileParser::parseNOTs(std::string line)
     }
 }
 
+/**
+ * @brief BenchFileParser::parseBUFs
+ * equivalent to parseANDs
+ * @param line
+ */
 void BenchFileParser::parseBUFs(std::string line)
 {
     std::vector<std::string> values_str;
@@ -464,7 +507,15 @@ void BenchFileParser::parseBUFs(std::string line)
         m_netlist->addBUF(new BUF(inputs,so));
     }
 }
-
+/**
+ * @brief BenchFileParser::read_body
+ * Skip comments (line starts with'#')
+ * read bench file specified by inputFile and store pimary inputs, primary outputs, DFFs and all gates into the netlist data structure (class Netlist)
+ * The assumption here is that the bench file format specifies all primary inputs and primary outputs first before specifying Gates or Flip Flops.
+ * By reading the .bench files I can't see that this assumption is incorrect
+ *
+ * @param inputFile file in bench format
+ */
 void BenchFileParser::read_body(string inputFile)
 {
     std::cout << "[INFO] reading body" << std::endl;
@@ -484,19 +535,21 @@ void BenchFileParser::read_body(string inputFile)
         parseNORs(line);
         parseNOTs(line);
         parseBUFs(line);
+        //TODO: parseDFFs(line)
     }
 }
 
 /**
  * @brief parses file specified by inputFile
- * @param inputFile file name
+ * doesn't read comments. If you want to collect information of comments in header of the file, use read_header.
+ * @param inputFile file name of file in bench format
  */
 void BenchFileParser::parseBenchFile(std::string inputFile)
 {
     cout << "[INFO] try to parse " << inputFile.c_str() << endl;
 //    read_header(inputFile);
     read_body(inputFile);
-    prettyPrintInfos();
+//    prettyPrintInfos();
     cout << "[INFO] end parsing " << inputFile.c_str() << endl;
 }
 

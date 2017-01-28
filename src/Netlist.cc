@@ -9,8 +9,11 @@ Netlist::Netlist()
 }
 
 /**
- * @brief
- * @param testPattern all test pattern lines
+ * @brief Netlist::prepareGatesWithPrimOutput
+ * sets the bool isPrimOutput to all outputs of gate.
+ * TODO: hasn't this been done already?
+ *
+ * @param allGates
  */
 void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 {
@@ -26,6 +29,16 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
     }
 }
 
+
+/**
+ * @brief Netlist::compute
+ * has nothing to do with computation. Should be called simulate or at least propagate
+ *
+ * assigns values of testPattern to primary inputs
+ * every output signal of every gate gets a value here. Starting with the gates directly after primary inputs.
+ *
+ * @param testPattern inputs as specified in vec
+ */
 void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
@@ -48,9 +61,12 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
     //set primary outputs
     prepareGatesWithPrimOutput(allGates);
 
+    /* when a gate's output signal is set, the gate is deleted from this vector */
     while(!allGates.empty())
     {
 
+        /** We want to start with gates directly after primary inputs, but the order in allGates is unknown
+         * though the first gates are likely at the end.*/
         BOOST_REVERSE_FOREACH(Gate* currentGate, allGates)
         {
 //            std::cout << "remaining gates: " << std::endl;
@@ -70,7 +86,10 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
                 currentGate->output()->setValue(currentGate->compute()); //TODO: necessary?
 //                std::cout << "    handling gate with output " << currentGate->output()->name() << "("<< currentGate->output()->value() << ")" << std::endl;
 
-                //alle inputs aller gates absuchen und input value speichert
+                /**
+                 * alle inputs aller gates absuchen und input value speichern.
+                 * propagate the output value of the current gate to the connected gates.
+                 */
                 BOOST_FOREACH(Gate* g, allGates)
                 {
                     if (g->output()->name() == currentGate->output()->name())
@@ -92,6 +111,10 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 //                    std::cout << "    input: " << gateInput->name() << " " << gateInput->value() << " " << gateInput->initSet() << std::endl;
 //                }
 
+                /**
+                 * currentGate should be done by now. It's output signal value is set and the output signal value is propagated to connected gates.
+                 * delete the current gate from allGates.
+                 */
                 auto it = std::find(allGates.begin(), allGates.end(), currentGate);
                 if (it != allGates.end())
                 {
@@ -101,6 +124,7 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
         }
     }
 
+    /* set primary output values */
     BOOST_FOREACH(Gate* g, allGates)
     {
         if (g->hasPrimOutput())
@@ -119,10 +143,15 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
     {
         std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
     }
+    std::cout << "" << std::endl;
 
     resetValues();
 }
 
+/**
+ * @brief ::Netlist::resetValues
+ * reset all signals of this netlist so the next test pattern can be simulated.
+ */
 void::Netlist::resetValues()
 {
     BOOST_FOREACH(Signal* s, m_primaryInputs)
