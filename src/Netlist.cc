@@ -40,16 +40,16 @@ void Netlist::collectFaults()
 
 /**
  * @brief Netlist::compute
- * has nothing to do with computation. Should be called simulate or at least propagate
+ * has not much to do with computation. Should rather be called simulate or at least propagate
  *
  * assigns values of testPattern to primary inputs
- * every output signal of every gate gets a value here. Starting with the gates directly after primary inputs.
+ * every output signal of every gate gets a value here.
+ * Starting with the gates directly after primary inputs.
  *
  * @param testPattern inputs as specified in vec
  */
 void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
-
     std::cout << "[INFO] simulation " << std::endl;
 
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
@@ -69,56 +69,15 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
     /* when a gate's output signal is set, the gate is deleted from this vector */
     while(!allGates.empty())
     {
-
-        /** We want to start with gates directly after primary inputs, but the order in allGates is unknown
-         * though the first gates are likely at the end.*/
         BOOST_FOREACH(Gate* currentGate, allGates)
         {
-//            std::cout << "remaining gates: " << std::endl;
-//            BOOST_FOREACH(Gate* r, allGates)
-//            {
-//                std::cout << "  " << r->output()->name();
-//            }
-
-//            std::cout << std::endl;
-//            std::cout << "################################" << std::endl;
-//            std::cout << "remaining gates: " << allGates.size() << std::endl;
-//            std::cout << "current gate: " << currentGate->output()->name() << std::endl;
-//            std::cout << "gates inputs are set: " << currentGate->allInputsSet() << std::endl;
             if (currentGate->allInputsSet())
             {
-
-                currentGate->output()->setValue(currentGate->compute()); //TODO: necessary?
-//                std::cout << "    handling gate with output " << currentGate->output()->name() << "("<< currentGate->output()->value() << ")" << std::endl;
-
+                currentGate->output()->setValue(currentGate->compute());
                 /**
-                 * alle inputs aller gates absuchen und input value speichern.
-                 * propagate the output value of the current gate to the connected gates.
-                 */
-                BOOST_FOREACH(Gate* g, allGates)
-                {
-                    if (g->output()->name() == currentGate->output()->name())
-                        continue;
-                    BOOST_FOREACH(Signal* s, g->inputs())
-                    {
-                        if (s->isPrimary())
-                            continue;
-                        if (s->name() == currentGate->output()->name())
-                        {
-//                            std::cout <<  "    output " << currentGate->output()->name() << " is input of gate " <<  g->output()->name() << std::endl;
-                            s->setValue(currentGate->output()->value());
-                        }
-                    }
-                }
-
-//                BOOST_FOREACH(Signal* gateInput, currentGate->inputs())
-//                {
-//                    std::cout << "    input: " << gateInput->name() << " " << gateInput->value() << " " << gateInput->initSet() << std::endl;
-//                }
-
-                /**
-                 * currentGate should be done by now. It's output signal value is set and the output signal value is propagated to connected gates.
-                 * delete the current gate from allGates.
+                 * currentGate should be done by now. It's output signal value is set
+                 * and the output signal value is propagated to connected gates.
+                 * Delete the current gate from allGates.
                  */
                 auto it = std::find(allGates.begin(), allGates.end(), currentGate);
                 if (it != allGates.end())
