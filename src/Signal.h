@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Gate.h"
+#include "SAFault.h"
 
 #include <string>
 #include <bitset>
 
 class Gate;
+class SAFault;
 
 class Signal
 {
@@ -34,6 +36,7 @@ public:
     void reset();
 
 private:
+    SAFault* m_fault;
     std::string m_name;
     bool m_isPrimary;
     Gate* m_source;

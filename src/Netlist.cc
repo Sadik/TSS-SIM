@@ -30,11 +30,11 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 }
 
 
-void Netlist::collectFaults()
+void Netlist::createFaults()
 {
-    BOOST_FOREACH(Signal* s, m_primaryInputs)
-    {
-
+    BOOST_FOREACH(Signal*s, m_allSignals) {
+        m_allFaults.push_back(new SAFault(1, s));
+        m_allFaults.push_back(new SAFault(0, s));
     }
 }
 
@@ -58,13 +58,10 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
         return;
     }
 
-    collectFaults();
     std::vector <Gate*> allGates = m_allGates;
     assignPrimaryInputValues(testPattern);
     std::cout << "[INFO] netlist has " << m_allSignals.size() << " signals" << std::endl;
 
-    //set primary outputs
-    prepareGatesWithPrimOutput(allGates);
 
     /* when a gate's output signal is set, the gate is deleted from this vector */
     while(!allGates.empty())
@@ -200,10 +197,20 @@ void Netlist::addPrimaryOutput(Signal* s)
 /**
  * @brief Netlist::prepare
  * must be called after bench file is fully parsed and the gates are already stored
+ *
+ * - creates a list of faults
+ * - sets the flag hasPrimaryOutput to gates with primary output
+ * - when output signal of gate a is equal to input signal of gate b, make it one object
+ * - create list of all signals m_allSignals
+ *
  */
 void Netlist::prepare()
 {
-    std::vector <Signal*> internalSignals; //TODO: was war hier die überlegung?
+    //creates faults and stores them in m_allFaults
+    createFaults();
+    //set hasPrimaryOutput
+    prepareGatesWithPrimOutput(m_allGates);
+
     m_allGates.insert( m_allGates.end(), m_ANDs.begin(), m_ANDs.end() );
     m_allGates.insert( m_allGates.end(), m_ORs.begin(), m_ORs.end() );
     m_allGates.insert( m_allGates.end(), m_NORs.begin(), m_NORs.end() );
@@ -233,6 +240,7 @@ void Netlist::prepare()
         }
     }
 
+    //add signals to m_allSignals if they aren't already in the list (vector)
     BOOST_FOREACH(Gate*g, m_allGates) {
         if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
            m_allSignals.push_back(g->output());

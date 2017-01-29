@@ -9,6 +9,7 @@
 #include "NOR.h"
 #include "NOT.h"
 #include "OR.h"
+#include "SAFault.h"
 #include "Signal.h"
 
 #include <boost/dynamic_bitset.hpp>
@@ -42,7 +43,7 @@ public:
     void addNOT(NOT *nt);
     void addBUF(BUF *buf);
 private:
-    void collectFaults();
+    void createFaults();
     void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
     void resetValues();
 private:
@@ -50,6 +51,7 @@ private:
     std::vector<Signal*> m_primaryOutputs;
     std::vector <Gate*> m_allGates;
     std::vector <Signal*> m_allSignals;
+    std::vector <SAFault*> m_allFaults;
     std::vector<AND*> m_ANDs;
     std::vector<NAND*> m_NANDs;
     std::vector<OR*> m_ORs;
