@@ -14,3 +14,9 @@ void BUF::BUF::prettyPrint()
     }
     std::cout << "         output: " << output()->name() << std::endl;
 }
+
+bool BUF::compute()
+{
+    m_output->setValue(m_inputs[0]);
+    return m_output->value();
+}

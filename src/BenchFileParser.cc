@@ -508,6 +508,37 @@ void BenchFileParser::parseBUFs(std::string line)
         m_netlist->addBUF(new BUF(inputs,so));
     }
 }
+
+void BenchFileParser::parseDFFs(std::string line)
+{
+    std::vector<std::string> values_str;
+    //DFF section
+    values_str.clear();
+    //cout << "IS THIS A DFF? " << line << endl;
+    bool const dff_result = qi::parse(line.begin(), line.end(),
+            qi::skip(qi::space) [*qi::alnum >> qi::omit[qi::char_("=") >> "DFF" >> qi::char_("(")] >> *qi::alnum >> qi::omit[qi::char_(")")]],
+            values_str);
+        //cout << "[DEBUG] dff_result: " << std::boolalpha << dff_result << endl;
+    if (dff_result && values_str.size() == 2)
+    {
+        //we want to make [0] a primary output and [1] a primary input.
+        //simplification
+        //cout << "[DEBUG] [0]: " << values_str[0] << endl;
+        // cout << "[DEBUG] [1]: " << values_str[1] << endl;
+        Signal* so = m_netlist->primaryOutputByName(values_str[1]);
+        if(!so)
+        {
+            m_netlist->addPrimaryOutput(new Signal(values_str[1], true));
+        }
+
+        so = m_netlist->primaryInputByName(values_str[0]);
+        if(!so)
+        {
+            m_netlist->addPrimaryInput(new Signal(values_str[0], true));
+        }
+    }
+}
+
 /**
  * @brief BenchFileParser::read_body
  * Skip comments (line starts with'#')
@@ -536,7 +567,7 @@ void BenchFileParser::read_body(string inputFile)
         parseNORs(line);
         parseNOTs(line);
         parseBUFs(line);
-        //TODO: parseDFFs(line)
+        parseDFFs(line);
     }
 }
 

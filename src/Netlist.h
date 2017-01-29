@@ -5,6 +5,7 @@
 
 #include "AND.h"
 #include "BUF.h"
+#include "DFF.h"
 #include "NAND.h"
 #include "NOR.h"
 #include "NOT.h"
@@ -38,11 +39,12 @@ public:
     std::vector<OR *> ORs() const;
 
     void addAND(AND* a);
+    void addBUF(BUF *buf);
+    void addDFF(DFF *dff);
     void addNAND(NAND* n);
-    void addOR(OR *o);
     void addNOR(NOR *no);
     void addNOT(NOT *nt);
-    void addBUF(BUF *buf);
+    void addOR(OR *o);
 
     void startSimulation(const std::vector<boost::dynamic_bitset<> > &testPattern);
 private:
@@ -66,4 +68,5 @@ private:
     std::vector<NOR*> m_NORs;
     std::vector<NOT*> m_NOTs;
     std::vector<BUF*> m_BUFs;
+    std::vector<DFF*> m_DFFs;
 };

@@ -35,18 +35,19 @@ private:
     void connectSignals();
     unsigned count_inputs(std::string inputFile);
     void parseBenchFile(std::string inputFile);
+
     void parsePrims(std::string line);
     void parseANDs(std::string line);
     void parseNANDs(std::string line);
-    void parseORs(std::string line);
-    void parseNORs(std::string line);
-    void parseNOTs(std::string line);
     void parseBUFs(std::string line);
+    void parseDFFs(std::string line);
+    void parseNOTs(std::string line);
+    void parseNORs(std::string line);
+    void parseORs(std::string line);
+
     void prettyPrintInfos();
     void read_body(std::string inputFile);
     void read_gates(std::string line);
     void read_header(std::string inputFile);
     void readPatternFile(std::string patternFile);
-
-
 };

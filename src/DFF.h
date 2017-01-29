@@ -4,10 +4,9 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 
-class AND : public Gate
+class DFF : public Gate
 {
 public:
-    AND(std::vector<Signal*> inputs, Signal* output);
+    DFF(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-    virtual bool compute();
 };

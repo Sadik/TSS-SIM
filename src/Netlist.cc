@@ -260,11 +260,10 @@ void Netlist::addPrimaryOutput(Signal* s)
  * @brief Netlist::prepare
  * must be called after bench file is fully parsed and the gates are already stored
  *
- * - creates a list of faults
  * - sets the flag hasPrimaryOutput to gates with primary output
  * - when output signal of gate a is equal to input signal of gate b, make it one object
  * - create list of all signals m_allSignals
- *
+ * - creates a list of faults
  */
 void Netlist::prepare()
 {
@@ -277,6 +276,7 @@ void Netlist::prepare()
     m_allGates.insert( m_allGates.end(), m_NOTs.begin(), m_NOTs.end() );
     m_allGates.insert( m_allGates.end(), m_BUFs.begin(), m_BUFs.end() );
     m_allGates.insert( m_allGates.end(), m_NANDs.begin(), m_NANDs.end() );
+    //the DFFs have been collected, but we don't treat them as a gate (actually DFF is a flip flop, but in my case I don't need a new class only for the correct terminology)
 
     BOOST_FOREACH(Signal*s, m_primaryInputs) {
         m_allSignals.push_back(s);
@@ -313,12 +313,13 @@ void Netlist::prepare()
     }
 
     //creates faults and stores them in m_allFaults
+    // must be called after m_allSignals is filled
     createFaults();
 
-    std::cout << "[DEBUG] Signal names: " << std::endl;
+    /*std::cout << "[DEBUG] Signal names: " << std::endl;
     BOOST_FOREACH(Signal*s, m_allSignals) {
         std::cout << "      Signal name: " << s->name() << std::endl;
-    }
+    }*/
 }
 
 Signal *Netlist::primaryInputByName(std::string name)
@@ -402,3 +403,7 @@ void Netlist::addBUF(BUF *buf)
     m_BUFs.push_back(buf);
 }
 
+void Netlist::addDFF(DFF *dff)
+{
+    m_DFFs.push_back(dff);
+}
