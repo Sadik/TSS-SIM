@@ -49,6 +49,7 @@ private:
     std::vector<Signal*> m_primaryInputs;
     std::vector<Signal*> m_primaryOutputs;
     std::vector <Gate*> m_allGates;
+    std::vector <Signal*> m_allSignals;
     std::vector<AND*> m_ANDs;
     std::vector<NAND*> m_NANDs;
     std::vector<OR*> m_ORs;

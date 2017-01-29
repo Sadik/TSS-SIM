@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <algorithm>
+
 #include <boost/foreach.hpp>
 
 Gate::Gate()
@@ -21,7 +23,12 @@ void Gate::addInput(Signal* s)
     m_inputs.push_back(s);
 }
 
-void Gate::addOutput(Signal* s)
+void Gate::replaceInput(Signal *replaceThis, Signal *withThis)
+{
+    std::replace(m_inputs.begin(), m_inputs.end(), replaceThis, withThis);
+}
+
+void Gate::setOutput(Signal* s)
 {
     m_output = s;
 }

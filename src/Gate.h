@@ -13,7 +13,8 @@ public:
     Gate();
     Gate(std::vector<Signal*> inputs, Signal* output);
     void addInput(Signal* s);
-    void addOutput(Signal* s);
+    void replaceInput(Signal* replaceThis, Signal* withThis);
+    void setOutput(Signal* s);
     bool allInputsSet() const;
     std::vector<Signal*> inputs() const;
     Signal *output() const;

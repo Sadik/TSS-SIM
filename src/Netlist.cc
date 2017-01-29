@@ -32,7 +32,10 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 
 void Netlist::collectFaults()
 {
+    BOOST_FOREACH(Signal* s, m_primaryInputs)
+    {
 
+    }
 }
 
 /**
@@ -58,6 +61,7 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
     collectFaults();
     std::vector <Gate*> allGates = m_allGates;
     assignPrimaryInputValues(testPattern);
+    std::cout << "[INFO] netlist has " << m_allSignals.size() << " signals" << std::endl;
 
     //set primary outputs
     prepareGatesWithPrimOutput(allGates);
@@ -247,6 +251,43 @@ void Netlist::prepare()
     m_allGates.insert( m_allGates.end(), m_NOTs.begin(), m_NOTs.end() );
     m_allGates.insert( m_allGates.end(), m_BUFs.begin(), m_BUFs.end() );
     m_allGates.insert( m_allGates.end(), m_NANDs.begin(), m_NANDs.end() );
+
+    BOOST_FOREACH(Signal*s, m_primaryInputs) {
+        m_allSignals.push_back(s);
+    }
+
+    BOOST_FOREACH(Signal*s, m_primaryOutputs) {
+        m_allSignals.push_back(s);
+    }
+
+    // Für jedes input signal des Gates schauen wir, ob es ein output signal eines anderen gates ist.
+    // Dann verbinden wir sie.
+    BOOST_FOREACH(Gate*g, m_allGates) {
+        BOOST_FOREACH(Signal *s, g->inputs()) {
+            BOOST_FOREACH(Gate*h, m_allGates) {
+                if (g == h)
+                    continue;
+                if (s->name() == h->output()->name()) {
+                    g->replaceInput(s, h->output());
+                }
+            }
+        }
+    }
+
+    BOOST_FOREACH(Gate*g, m_allGates) {
+        if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
+           m_allSignals.push_back(g->output());
+
+        BOOST_FOREACH(Signal*s, g->inputs()) {
+            if ( std::find(m_allSignals.begin(), m_allSignals.end(), s) == m_allSignals.end() )
+               m_allSignals.push_back(s);
+        }
+
+    }
+    std::cout << "[DEBUG] Signal names: " << std::endl;
+    BOOST_FOREACH(Signal*s, m_allSignals) {
+        std::cout << "      Signal name: " << s->name() << std::endl;
+    }
 }
 
 Signal *Netlist::primaryInputByName(std::string name)
