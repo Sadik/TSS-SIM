@@ -37,9 +37,9 @@ void Netlist::createFaults()
     }
 }
 
-
 std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPattern)
 {
+    //std::cout << "    [DEBUG] started simulating a pattern" << std::endl;
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
         std::cout << "[WRN] tried to compute before parsing! Return." << std::endl;
@@ -98,6 +98,9 @@ std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPatte
 
     //std::sort (result.begin(), result.end(), sortSignals);
     resetValues();
+
+    //std::cout << "    [DEBUG] finished simulating a pattern" << std::endl;
+
     return collect;
 }
 
@@ -132,26 +135,21 @@ bool Netlist::differsFromGoodResult(std::vector<Signal*> result)
 
 /**
  * @brief Netlist::compute
- * has not much to do with computation. Should rather be called simulate or at least propagate
+ * has not much to do with computation. Should rather be called simulate or something
  *
- * assigns values of testPattern to primary inputs
- * every output signal of every gate gets a value here.
- * Starting with the gates directly after primary inputs.
+ * first simulates the netlist with testPattern as input values
+ * then creates stuck-at-faults for the signals and checks, if it makes a difference
  *
  * @param testPattern inputs as specified in vec
  */
 void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
-
     m_goodResult = simulate(testPattern);
-  /*  std::cout << "[DEBUG] m_goodResult: " << std::endl;
-    BOOST_FOREACH(Signal* s, m_goodResult) {
-        std::cout << "    " << s->name() << ": " << s->value() << std::endl;
-    }*/
 
     std::vector<Signal*> currentResult;
 
     BOOST_FOREACH(Signal*s, m_allSignals) {
+
         SAFault* sa0 = getFaultByName(s->name()+"-sa0");
         s->setFault(sa0); //stuck at 0
         currentResult = simulate(testPattern);
@@ -170,9 +168,9 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
             if ( std::find(m_detectedFaults.begin(), m_detectedFaults.end(), sa1) == m_detectedFaults.end() )
                m_detectedFaults.push_back(sa1);
         }
+        resetValues();
     }
 
-    resetValues();
 }
 
 SAFault* Netlist::getFaultByName(std::string name) {
@@ -189,14 +187,10 @@ SAFault* Netlist::getFaultByName(std::string name) {
  */
 void::Netlist::resetValues()
 {
-    BOOST_FOREACH(Signal* s, m_primaryInputs)
-    {
+    BOOST_FOREACH(Signal*s, m_allSignals) {
         s->reset();
     }
-    BOOST_FOREACH(Signal* s, m_primaryOutputs)
-    {
-        s->reset();
-    }
+
     BOOST_FOREACH(Gate* s, m_ANDs)
     {
         s->reset();

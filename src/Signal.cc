@@ -93,7 +93,7 @@ void Signal::reset()
 {
     m_value = 0;
     m_init_set = false;
-    m_fault = NULL;
+    m_fault = nullptr;
 }
 
 SAFault *Signal::fault() const
