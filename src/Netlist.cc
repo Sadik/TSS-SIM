@@ -30,6 +30,11 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 }
 
 
+void Netlist::collectFaults()
+{
+
+}
+
 /**
  * @brief Netlist::compute
  * has nothing to do with computation. Should be called simulate or at least propagate
@@ -41,22 +46,18 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
  */
 void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
+
+    std::cout << "[INFO] simulation " << std::endl;
+
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
         std::cout << "[WRN] tried to compute before parsing! Return." << std::endl;
         return;
     }
 
+    collectFaults();
+    std::vector <Gate*> allGates = m_allGates;
     assignPrimaryInputValues(testPattern);
-
-    std::vector <Gate*> allGates;
-    std::vector <Signal*> internalSignals;
-    allGates.insert( allGates.end(), m_ANDs.begin(), m_ANDs.end() );
-    allGates.insert( allGates.end(), m_ORs.begin(), m_ORs.end() );
-    allGates.insert( allGates.end(), m_NORs.begin(), m_NORs.end() );
-    allGates.insert( allGates.end(), m_NOTs.begin(), m_NOTs.end() );
-    allGates.insert( allGates.end(), m_BUFs.begin(), m_BUFs.end() );
-    allGates.insert( allGates.end(), m_NANDs.begin(), m_NANDs.end() );
 
     //set primary outputs
     prepareGatesWithPrimOutput(allGates);
@@ -67,7 +68,7 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 
         /** We want to start with gates directly after primary inputs, but the order in allGates is unknown
          * though the first gates are likely at the end.*/
-        BOOST_REVERSE_FOREACH(Gate* currentGate, allGates)
+        BOOST_FOREACH(Gate* currentGate, allGates)
         {
 //            std::cout << "remaining gates: " << std::endl;
 //            BOOST_FOREACH(Gate* r, allGates)
@@ -233,6 +234,21 @@ void Netlist::addPrimaryOutput(Signal* s)
     m_primaryOutputs.push_back(s);
 }
 
+/**
+ * @brief Netlist::prepare
+ * must be called after bench file is fully parsed and the gates are already stored
+ */
+void Netlist::prepare()
+{
+    std::vector <Signal*> internalSignals; //TODO: was war hier die überlegung?
+    m_allGates.insert( m_allGates.end(), m_ANDs.begin(), m_ANDs.end() );
+    m_allGates.insert( m_allGates.end(), m_ORs.begin(), m_ORs.end() );
+    m_allGates.insert( m_allGates.end(), m_NORs.begin(), m_NORs.end() );
+    m_allGates.insert( m_allGates.end(), m_NOTs.begin(), m_NOTs.end() );
+    m_allGates.insert( m_allGates.end(), m_BUFs.begin(), m_BUFs.end() );
+    m_allGates.insert( m_allGates.end(), m_NANDs.begin(), m_NANDs.end() );
+}
+
 Signal *Netlist::primaryInputByName(std::string name)
 {
     BOOST_FOREACH(Signal* s, m_primaryInputs)
@@ -313,3 +329,4 @@ void Netlist::addBUF(BUF *buf)
 {
     m_BUFs.push_back(buf);
 }
+

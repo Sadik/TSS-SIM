@@ -37,6 +37,9 @@ BenchFileParser::BenchFileParser(std::string benchFile, string patternFile)
     //m_netlist->compute(m_testPattern);
 
     //This is actually part of the simulation and shouldn't be part of this class
+    cout << "[INFO] tests: " << m_testPattern.size() << endl;
+
+    m_netlist->prepare();
     BOOST_FOREACH(auto pattern, m_testPattern)
     {
         m_netlist->compute(pattern);
@@ -108,6 +111,7 @@ void BenchFileParser::read_header(std::string inputFile)
 
 void BenchFileParser::readPatternFile(string patternFile)
 {
+    cout << "[INFO] try to read " << patternFile.c_str() << endl;
     std::ifstream file(patternFile.c_str());
     std::string line;
 
@@ -135,6 +139,7 @@ void BenchFileParser::readPatternFile(string patternFile)
 //            std::cout << "    " << bits.none() << '\n';
         }
     }
+    cout << "[INFO] end reading " << patternFile.c_str() << endl;
 }
 
 /**

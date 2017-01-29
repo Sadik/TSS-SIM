@@ -24,6 +24,7 @@ public:
     std::vector<Signal*> primaryOutputs() const;
     void addPrimaryInput(Signal* s);
     void addPrimaryOutput(Signal* s);
+    void prepare();
     Signal* primaryInputByName(std::string name);
     Signal* primaryOutputByName(std::string name);
 
@@ -41,11 +42,13 @@ public:
     void addNOT(NOT *nt);
     void addBUF(BUF *buf);
 private:
+    void collectFaults();
     void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
     void resetValues();
 private:
     std::vector<Signal*> m_primaryInputs;
     std::vector<Signal*> m_primaryOutputs;
+    std::vector <Gate*> m_allGates;
     std::vector<AND*> m_ANDs;
     std::vector<NAND*> m_NANDs;
     std::vector<OR*> m_ORs;

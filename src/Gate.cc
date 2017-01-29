@@ -71,4 +71,6 @@ void Gate::reset()
     {
         s->reset();
     }
+
+    m_output->reset();
 }
