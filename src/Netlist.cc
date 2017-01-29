@@ -116,7 +116,7 @@ void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPa
 
     std::cout << "[RESULT] total faults:    " << m_allFaults.size() << std::endl;
     std::cout << "[RESULT] detected faults: " << m_detectedFaults.size() << std::endl;
-    float coverage = m_detectedFaults.size() / m_allFaults.size();
+    float coverage = (float)m_detectedFaults.size() / (float)m_allFaults.size();
     std::cout << "[RESULT] coverage:        " << coverage << std::endl;
 }
 
@@ -152,28 +152,36 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
     std::vector<Signal*> currentResult;
 
     BOOST_FOREACH(Signal*s, m_allSignals) {
-        SAFault* sa0 = new SAFault(0, s);
+        SAFault* sa0 = getFaultByName(s->name()+"-sa0");
         s->setFault(sa0); //stuck at 0
         currentResult = simulate(testPattern);
         //std::sort (currentResult.begin(), currentResult.end(), sortSignals);
         if (differsFromGoodResult(currentResult)) {
-            m_detectedFaults.push_back(sa0);
+            if ( std::find(m_detectedFaults.begin(), m_detectedFaults.end(), sa0) == m_detectedFaults.end() )
+               m_detectedFaults.push_back(sa0);
         }
         resetValues();
 
-        SAFault* sa1 = new SAFault(1, s);
-        s->setFault(sa1); //stuck at 0
+        SAFault* sa1 = getFaultByName(s->name()+"-sa1");
+        s->setFault(sa1); //stuck at 1
         currentResult = simulate(testPattern);
         //std::sort (currentResult.begin(), currentResult.end(), sortSignals);
         if (differsFromGoodResult(currentResult)) {
-            m_detectedFaults.push_back(sa1);
+            if ( std::find(m_detectedFaults.begin(), m_detectedFaults.end(), sa1) == m_detectedFaults.end() )
+               m_detectedFaults.push_back(sa1);
         }
     }
 
     resetValues();
 }
 
-
+SAFault* Netlist::getFaultByName(std::string name) {
+    BOOST_FOREACH(SAFault* fault, m_allFaults) {
+        if (fault->name() == name)
+            return fault;
+    }
+    return nullptr;
+}
 
 /**
  * @brief ::Netlist::resetValues

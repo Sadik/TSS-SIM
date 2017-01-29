@@ -48,6 +48,7 @@ public:
 private:
     void createFaults();
     bool differsFromGoodResult(std::vector<Signal *> result);
+    SAFault *getFaultByName(std::string name);
     void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
     void resetValues();
     bool sortSignals(Signal *i, Signal *j);
