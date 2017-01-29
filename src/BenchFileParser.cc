@@ -40,11 +40,7 @@ BenchFileParser::BenchFileParser(std::string benchFile, string patternFile)
     cout << "[INFO] tests: " << m_testPattern.size() << endl;
 
     m_netlist->prepare();
-    BOOST_FOREACH(auto pattern, m_testPattern)
-    {
-        m_netlist->compute(pattern);
-    }
-
+    m_netlist->startSimulation(m_testPattern);
 }
 
 /**

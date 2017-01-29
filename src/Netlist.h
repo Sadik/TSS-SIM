@@ -19,6 +19,7 @@ class Netlist
 public:
     Netlist();
     void compute(const boost::dynamic_bitset<> &testPattern);
+    std::vector<Signal*> simulate(const boost::dynamic_bitset<> &testPattern);
     void assignPrimaryInputValues(const boost::dynamic_bitset<> &testPattern);
 
     std::vector<Signal*> primaryInputs() const;
@@ -42,16 +43,22 @@ public:
     void addNOR(NOR *no);
     void addNOT(NOT *nt);
     void addBUF(BUF *buf);
+
+    void startSimulation(const std::vector<boost::dynamic_bitset<> > &testPattern);
 private:
     void createFaults();
+    bool differsFromGoodResult(std::vector<Signal *> result);
     void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
     void resetValues();
+    bool sortSignals(Signal *i, Signal *j);
 private:
+    std::vector<Signal*> m_goodResult;
     std::vector<Signal*> m_primaryInputs;
     std::vector<Signal*> m_primaryOutputs;
     std::vector <Gate*> m_allGates;
     std::vector <Signal*> m_allSignals;
     std::vector <SAFault*> m_allFaults;
+    std::vector <SAFault*> m_detectedFaults;
     std::vector<AND*> m_ANDs;
     std::vector<NAND*> m_NANDs;
     std::vector<OR*> m_ORs;

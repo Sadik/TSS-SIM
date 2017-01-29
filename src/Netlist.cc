@@ -29,7 +29,6 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
     }
 }
 
-
 void Netlist::createFaults()
 {
     BOOST_FOREACH(Signal*s, m_allSignals) {
@@ -38,30 +37,17 @@ void Netlist::createFaults()
     }
 }
 
-/**
- * @brief Netlist::compute
- * has not much to do with computation. Should rather be called simulate or at least propagate
- *
- * assigns values of testPattern to primary inputs
- * every output signal of every gate gets a value here.
- * Starting with the gates directly after primary inputs.
- *
- * @param testPattern inputs as specified in vec
- */
-void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
-{
-    std::cout << "[INFO] simulation " << std::endl;
 
+std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPattern)
+{
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
         std::cout << "[WRN] tried to compute before parsing! Return." << std::endl;
-        return;
+        return std::vector<Signal*>();
     }
 
     std::vector <Gate*> allGates = m_allGates;
     assignPrimaryInputValues(testPattern);
-    std::cout << "[INFO] netlist has " << m_allSignals.size() << " signals" << std::endl;
-
 
     /* when a gate's output signal is set, the gate is deleted from this vector */
     while(!allGates.empty())
@@ -100,14 +86,94 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
         }
     }
 
+    std::vector<Signal*> collect;
     BOOST_FOREACH(Signal*s, primaryOutputs())
     {
-        std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
+        Signal* t = new Signal(s->name(), s->isPrimary());
+        t->setValue(s->value());
+        collect.push_back(t);
+       // std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
     }
-    std::cout << "" << std::endl;
+    //std::cout << "" << std::endl;
+
+    //std::sort (result.begin(), result.end(), sortSignals);
+    resetValues();
+    return collect;
+}
+
+bool Netlist::sortSignals (Signal* i, Signal* j) {
+    return (i->name() < j->name());
+}
+
+void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPattern)
+{
+    std::cout << "[INFO] starting simulation" << std::endl;
+
+    BOOST_FOREACH(auto pattern, testPattern)
+    {
+        compute(pattern);
+    }
+
+    std::cout << "[RESULT] total faults:    " << m_allFaults.size() << std::endl;
+    std::cout << "[RESULT] detected faults: " << m_detectedFaults.size() << std::endl;
+    float coverage = m_detectedFaults.size() / m_allFaults.size();
+    std::cout << "[RESULT] coverage:        " << coverage << std::endl;
+}
+
+bool Netlist::differsFromGoodResult(std::vector<Signal*> result)
+{
+    for (int i=0; i<result.size(); i++) {
+        if (result[i]->value() != m_goodResult[i]->value()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Netlist::compute
+ * has not much to do with computation. Should rather be called simulate or at least propagate
+ *
+ * assigns values of testPattern to primary inputs
+ * every output signal of every gate gets a value here.
+ * Starting with the gates directly after primary inputs.
+ *
+ * @param testPattern inputs as specified in vec
+ */
+void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
+{
+
+    m_goodResult = simulate(testPattern);
+  /*  std::cout << "[DEBUG] m_goodResult: " << std::endl;
+    BOOST_FOREACH(Signal* s, m_goodResult) {
+        std::cout << "    " << s->name() << ": " << s->value() << std::endl;
+    }*/
+
+    std::vector<Signal*> currentResult;
+
+    BOOST_FOREACH(Signal*s, m_allSignals) {
+        SAFault* sa0 = new SAFault(0, s);
+        s->setFault(sa0); //stuck at 0
+        currentResult = simulate(testPattern);
+        //std::sort (currentResult.begin(), currentResult.end(), sortSignals);
+        if (differsFromGoodResult(currentResult)) {
+            m_detectedFaults.push_back(sa0);
+        }
+        resetValues();
+
+        SAFault* sa1 = new SAFault(1, s);
+        s->setFault(sa1); //stuck at 0
+        currentResult = simulate(testPattern);
+        //std::sort (currentResult.begin(), currentResult.end(), sortSignals);
+        if (differsFromGoodResult(currentResult)) {
+            m_detectedFaults.push_back(sa1);
+        }
+    }
 
     resetValues();
 }
+
+
 
 /**
  * @brief ::Netlist::resetValues
@@ -160,18 +226,6 @@ void Netlist::assignPrimaryInputValues(const boost::dynamic_bitset<> &testPatter
         m_primaryInputs[i]->setValue((bool)testPattern[i]);
         m_primaryInputs[i]->setInitSet(true); //TODO: do we need this init_set bool?
     }
-
-    std::cout << "INPUT: ";
-    BOOST_FOREACH(Signal* inp, m_primaryInputs)
-    {
-        std::cout << inp->value();
-    }
-    std::cout << std::endl;
-//    std::cout << "INPUT0: " << m_primaryInputs[0]->name() <<  " = " << m_primaryInputs[0]->value() << std::endl;
-//    std::cout << "INPUT1: " << m_primaryInputs[1]->name() <<  " = " << m_primaryInputs[1]->value() << std::endl;
-//    std::cout << "INPUT2: " << m_primaryInputs[2]->name() <<  " = " << m_primaryInputs[2]->value() << std::endl;
-//    std::cout << "INPUT3: " << m_primaryInputs[3]->name() <<  " = " << m_primaryInputs[3]->value() << std::endl;
-//    std::cout << "INPUT4: " << m_primaryInputs[4]->name() <<  " = " << m_primaryInputs[4]->value() << std::endl;
 }
 
 std::vector<Signal*> Netlist::primaryInputs() const
@@ -206,8 +260,6 @@ void Netlist::addPrimaryOutput(Signal* s)
  */
 void Netlist::prepare()
 {
-    //creates faults and stores them in m_allFaults
-    createFaults();
     //set hasPrimaryOutput
     prepareGatesWithPrimOutput(m_allGates);
 
@@ -251,6 +303,10 @@ void Netlist::prepare()
         }
 
     }
+
+    //creates faults and stores them in m_allFaults
+    createFaults();
+
     std::cout << "[DEBUG] Signal names: " << std::endl;
     BOOST_FOREACH(Signal*s, m_allSignals) {
         std::cout << "      Signal name: " << s->name() << std::endl;

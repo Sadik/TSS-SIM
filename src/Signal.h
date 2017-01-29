@@ -35,6 +35,9 @@ public:
 
     void reset();
 
+    SAFault *fault() const;
+    void setFault(SAFault *fault);
+
 private:
     SAFault* m_fault;
     std::string m_name;

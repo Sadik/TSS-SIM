@@ -13,6 +13,7 @@ Signal::Signal(std::string name, bool isPrimary)
     m_isPrimary = isPrimary;
     m_value = 0;
     m_init_set = 0;
+    m_fault = NULL;
 }
 
 bool Signal::isPrimary()
@@ -55,9 +56,21 @@ void Signal::setDestiny(Gate *dest)
     m_dest = dest;
 }
 
+/**
+ * @brief Signal::value
+ * the correct value is only return when there is no stuck-at fault on this signal
+ *
+ * @return
+ */
 bool Signal::value() const
 {
-    return m_value;
+    if (m_fault == NULL)
+        return m_value;
+    else if (m_fault->sa()) {
+        return 1;
+    } else if(!m_fault->sa()) {
+        return 0;
+    }
 }
 
 void Signal::setValue(bool value)
@@ -80,4 +93,15 @@ void Signal::reset()
 {
     m_value = 0;
     m_init_set = false;
+    m_fault = NULL;
+}
+
+SAFault *Signal::fault() const
+{
+    return m_fault;
+}
+
+void Signal::setFault(SAFault *fault)
+{
+    m_fault = fault;
 }
