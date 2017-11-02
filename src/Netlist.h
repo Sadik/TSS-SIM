@@ -47,6 +47,8 @@ public:
     void addOR(OR *o);
 
     void startSimulation(const std::vector<boost::dynamic_bitset<> > &testPattern);
+    void prettyPrintInfos();
+
 private:
     void createFaults();
     bool differsFromGoodResult(std::vector<Signal *> result);

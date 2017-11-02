@@ -12,7 +12,7 @@
 class BenchFileParser
 {
 public:
-    BenchFileParser(std::string benchFile, std::string patternFile);
+    BenchFileParser(const std::string benchFile, Netlist* netlist);
 
 private:
     unsigned m_inputs_count;
@@ -27,26 +27,26 @@ private:
 
     std::vector<unsigned> m_inputs;
     std::vector<unsigned> m_outputs;
-    Netlist* m_netlist;
+
     bool m_readHeader;
     std::vector<boost::dynamic_bitset<>> m_testPattern;
 
 private:
     void connectSignals();
     unsigned count_inputs(std::string inputFile);
-    void parseBenchFile(std::string inputFile);
+    void parseBenchFile(const std::string& inputFile, Netlist* netlist);
 
-    void parsePrims(std::string line);
-    void parseANDs(std::string line);
-    void parseNANDs(std::string line);
-    void parseBUFs(std::string line);
-    void parseDFFs(std::string line);
-    void parseNOTs(std::string line);
-    void parseNORs(std::string line);
-    void parseORs(std::string line);
+    void parsePrims(const std::string &line, Netlist *netlist);
+    void parseANDs(const std::string &line, Netlist *netlist);
+    void parseNANDs(const std::string &line, Netlist *netlist);
+    void parseBUFs(const std::string &line, Netlist *netlist);
+    void parseDFFs(const std::string &line, Netlist *netlist);
+    void parseNOTs(const std::string &line, Netlist *netlist);
+    void parseNORs(const std::string &line, Netlist *netlist);
+    void parseORs(const std::string &line, Netlist *netlist);
 
     void prettyPrintInfos();
-    void read_body(std::string inputFile);
+    void read_body(const std::string &inputFile, Netlist *netlist);
     void read_gates(std::string line);
     void read_header(std::string inputFile);
     void readPatternFile(std::string patternFile);

@@ -3,6 +3,8 @@
 #include <boost/foreach.hpp>
 #include <typeinfo>
 
+using namespace std;
+
 Netlist::Netlist()
 {
 
@@ -400,4 +402,53 @@ void Netlist::addBUF(BUF *buf)
 void Netlist::addDFF(DFF *dff)
 {
     m_DFFs.push_back(dff);
+}
+
+void Netlist::prettyPrintInfos()
+{
+
+    cout << "[STAT] " << endl;
+    cout << "       inputs:    " << m_primaryInputs.size() << endl;
+    cout << "       outputs:   " << m_primaryOutputs.size() << endl;
+    cout << "       inverters: " << m_NOTs.size() << endl;
+    cout << "       AND Gates: " << m_ANDs.size() << endl;
+    cout << "       OR Gates:  " << m_ORs.size() << endl;
+    cout << "       NAND Gates:" << m_NANDs.size() << endl;
+    cout << "       NOR Gates: " << m_NORs.size() << endl;
+    cout << "       buffers:   " << m_BUFs.size() << endl;
+    cout << "       DFFs:      " << m_DFFs.size() << endl;
+
+
+    if (primaryInputs().size() >= 1){
+        cout << "[STAT]    inputs: ";
+        BOOST_FOREACH(Signal* s, primaryInputs())
+        {
+            cout << s->name() << " ";
+        }
+        cout << endl;
+    }
+    if (primaryOutputs().size() >= 1){
+        cout << "[STAT]    outputs: ";
+        BOOST_FOREACH(Signal* s, primaryOutputs())
+        {
+            cout << s->name() << " ";
+        }
+        cout << endl;
+    }
+    if (ANDs().size() >= 1)
+    {
+        cout << "[STAT] ANDs:" << endl;
+        BOOST_FOREACH(AND* n, ANDs())
+        {
+            n->prettyPrint();
+        }
+    }
+    if (NANDs().size() >= 1)
+    {
+        cout << "[STAT] NANDs:" << endl;
+        BOOST_FOREACH(NAND* n, NANDs())
+        {
+            n->prettyPrint();
+        }
+    }
 }

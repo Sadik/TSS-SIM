@@ -3,6 +3,7 @@
 #include <iterator>
 
 #include "src/BenchFileParser.h"
+#include "src/PatternFileParser.h"
 
 #include <boost/foreach.hpp>
 
@@ -15,7 +16,15 @@ int main(int argc, char** argv)
         cout << "usage: TSS-SIM bench-file pattern-file" << endl;
         exit(-1);
     }
-    auto parser = new BenchFileParser(argv[1], argv[2]);
+
+    Netlist* netlist = new Netlist();
+    BenchFileParser* benchFileParser = new BenchFileParser(argv[1], netlist);
+    PatternFileParser* patternFileParser = new PatternFileParser(argv[2]);
+    std::vector<boost::dynamic_bitset<>> testPattern = patternFileParser->getTestPattern();
+
+    netlist->prepare();
+    cout << "[INFO] tests: " << testPattern.size() << endl;
+    netlist->startSimulation(testPattern);
 
    /* BOOST_FOREACH( char ch, hello )
     {
