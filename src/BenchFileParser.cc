@@ -29,14 +29,8 @@ using namespace std;
 
 BenchFileParser::BenchFileParser(const std::string benchFile, Netlist* netlist)
 {
-    m_readHeader = false;
     cout << "[INFO] BenchFileParser created" << endl;
     parseBenchFile(benchFile, netlist);
-
-    //m_netlist->compute(m_testPattern);
-
-    //This is actually part of the simulation and shouldn't be part of this class
-
 }
 
 /**
@@ -91,7 +85,7 @@ void BenchFileParser::parseANDs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
     if (and_result)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
+        Signal* so = netlist->signalByName(values_str[0]);
         if (!so)
         {
             so = new Signal(values_str[0]);
@@ -103,7 +97,7 @@ void BenchFileParser::parseANDs(const std::string& line, Netlist* netlist)
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->primaryInputByName(signalName);
+            Signal* s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
@@ -133,10 +127,11 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] nand_result: " << std::boolalpha << nand_result << endl;
     if (nand_result)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
-        if (!so)
+//        Signal* output = netlist->primaryOutputByName(values_str[0]);
+        Signal* output = netlist->signalByName(values_str[0]);
+        if (!output)
         {
-            so = new Signal(values_str[0]);
+            output = new Signal(values_str[0]);
         }
         vector<Signal*> inputs;
         BOOST_FOREACH(std::string signalName, values_str)
@@ -144,16 +139,18 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->primaryInputByName(signalName);
-            if (s)
+            Signal* s = netlist->signalByName(signalName);
+//            Signal* s = netlist->primaryInputByName(signalName);
+            if (!s)
             {
-                inputs.push_back(s);
-            } else {
-                inputs.push_back(new Signal(signalName));
+                s = new Signal(signalName);
             }
+            inputs.push_back(s);
+            netlist->addSignal(s);
         }
 
-        netlist->addNAND(new NAND(inputs,so));
+
+        netlist->addNAND(new NAND(inputs,output));
     }
 }
 
@@ -173,7 +170,7 @@ void BenchFileParser::parseORs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
     if (or_result)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
+        Signal* so = netlist->signalByName(values_str[0]);
         if (!so)
         {
             so = new Signal(values_str[0]);
@@ -184,7 +181,7 @@ void BenchFileParser::parseORs(const std::string& line, Netlist* netlist)
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->primaryInputByName(signalName);
+            Signal* s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
@@ -213,7 +210,7 @@ void BenchFileParser::parseNORs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
     if (nor_result)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
+        Signal* so = netlist->signalByName(values_str[0]);
         if (!so)
         {
             so = new Signal(values_str[0]);
@@ -224,7 +221,7 @@ void BenchFileParser::parseNORs(const std::string& line, Netlist* netlist)
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->primaryInputByName(signalName);
+            Signal* s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
@@ -253,13 +250,13 @@ void BenchFileParser::parseNOTs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
     if (not_result && values_str.size() == 2)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
+        Signal* so = netlist->signalByName(values_str[0]);
         if (!so)
         {
             so = new Signal(values_str[0]);
         }
         vector<Signal*> inputs;
-        Signal* si = netlist->primaryInputByName(values_str[1]);
+        Signal* si = netlist->signalByName(values_str[1]);
         if (!si)
         {
             si = new Signal(values_str[1]);
@@ -286,13 +283,13 @@ void BenchFileParser::parseBUFs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
     if (buf_result && values_str.size() == 2)
     {
-        Signal* so = netlist->primaryOutputByName(values_str[0]);
+        Signal* so = netlist->signalByName(values_str[0]);
         if (!so)
         {
             so = new Signal(values_str[0]);
         }
         vector<Signal*> inputs;
-        Signal* si = netlist->primaryInputByName(values_str[1]);
+        Signal* si = netlist->signalByName(values_str[1]);
         if (!si)
         {
             si = new Signal(values_str[1]);
@@ -344,7 +341,7 @@ void BenchFileParser::parseDFFs(const std::string& line, Netlist* netlist)
  */
 void BenchFileParser::parseBenchFile(const string &inputFile, Netlist* netlist)
 {
-    std::cout << "[INFO] reading body" << std::endl;
+    std::cout << "[INFO] reading bench file" << std::endl;
 
     std::ifstream file(inputFile.c_str());
     std::string line;

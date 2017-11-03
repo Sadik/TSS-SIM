@@ -14,6 +14,31 @@
 #include "Signal.h"
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/unordered_set.hpp>
+
+struct SignalEqual
+{
+    bool operator()(const Signal* s1, const Signal* s2) const
+    {
+        return s1->name() == s2->name();
+    }
+};
+
+struct SignalHash
+{
+
+    std::size_t operator()(const Signal* signal) const
+    {
+
+        std::string r = "";
+        for (auto c : signal->name())
+        {
+            r += std::to_string((int)c % 10);
+        }
+
+        return std::stoi(r);
+    }
+};
 
 class Netlist
 {
@@ -25,9 +50,11 @@ public:
 
     std::vector<Signal*> primaryInputs() const;
     std::vector<Signal*> primaryOutputs() const;
+    void addSignal(Signal* s);
     void addPrimaryInput(Signal* s);
     void addPrimaryOutput(Signal* s);
     void prepare();
+    Signal* signalByName(const std::string& name);
     Signal* primaryInputByName(std::string name);
     Signal* primaryOutputByName(std::string name);
 
@@ -61,7 +88,7 @@ private:
     std::vector<Signal*> m_primaryInputs;
     std::vector<Signal*> m_primaryOutputs;
     std::vector <Gate*> m_allGates;
-    std::vector <Signal*> m_allSignals;
+    boost::unordered_set<Signal*, SignalHash, SignalEqual> m_allSignals;
     std::vector <SAFault*> m_allFaults;
     std::vector <SAFault*> m_detectedFaults;
     std::vector<AND*> m_ANDs;

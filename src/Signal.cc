@@ -3,17 +3,14 @@
 #include <iostream>
 
 Signal::Signal()
+    : m_name(""), m_isPrimary(false), m_value(0), m_init_set(0), m_fault(NULL)
 {
-    std::cout << "[WRN] Signal without name was created" << std::endl;
+//    std::cout << "[WRN] Signal without name was created" << std::endl;
 }
 
 Signal::Signal(std::string name, bool isPrimary)
+    : m_name(name), m_isPrimary(isPrimary), m_value(0), m_init_set(0), m_fault(NULL)
 {
-    m_name = name;
-    m_isPrimary = isPrimary;
-    m_value = 0;
-    m_init_set = 0;
-    m_fault = NULL;
 }
 
 bool Signal::isPrimary()
@@ -46,19 +43,19 @@ void Signal::setSource(Gate *source)
     m_source = source;
 }
 
-Gate* Signal::destiny() const
+Gate* Signal::target() const
 {
-    return m_dest;
+    return m_target;
 }
 
-void Signal::setDestiny(Gate *dest)
+void Signal::setTarget(Gate *dest)
 {
-    m_dest = dest;
+    m_target = dest;
 }
 
 /**
  * @brief Signal::value
- * the correct value is only return when there is no stuck-at fault on this signal
+ * the correct value is only returned when there is no stuck-at fault on this signal
  *
  * @return
  */
@@ -104,4 +101,24 @@ SAFault *Signal::fault() const
 void Signal::setFault(SAFault *fault)
 {
     m_fault = fault;
+}
+
+bool Signal::compare(const std::string &name)
+{
+    return this->name() == name;
+}
+
+bool Signal::operator==(const std::string& name) const
+{
+    return this->name() == name;
+}
+
+bool Signal::operator==(const Signal* signal) const
+{
+    return this->name() == signal->name();
+}
+
+bool Signal::operator==(const Signal &signal) const
+{
+    return this->name() == signal.name();
 }

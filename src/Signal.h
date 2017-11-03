@@ -14,6 +14,7 @@ class Signal
 public:
     Signal();
     Signal(std::string name, bool isPrimary = false);
+//    Signal(std::string name, Gate* source, Gate* target, bool isPrimary = false);
 
     bool isPrimary();
     void setIsPrimary(bool isPrimary);
@@ -24,8 +25,8 @@ public:
     Gate *source() const;
     void setSource(Gate *source);
 
-    Gate *destiny() const;
-    void setDestiny(Gate *dest);
+    Gate *target() const;
+    void setTarget(Gate *dest);
 
     bool value() const;
     void setValue(bool value);
@@ -38,12 +39,18 @@ public:
     SAFault *fault() const;
     void setFault(SAFault *fault);
 
+    bool compare(const std::string& name);
+
+    bool operator==(const Signal* signal) const;
+    bool operator==(const std::string &name) const;
+    bool operator==(const Signal& signal) const;
+
 private:
     SAFault* m_fault;
     std::string m_name;
     bool m_isPrimary;
     Gate* m_source;
-    Gate* m_dest;
+    Gate* m_target;
     bool m_value;
     bool m_init_set;
 

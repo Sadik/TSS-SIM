@@ -1,6 +1,10 @@
 #include "Netlist.h"
 
+#include "Fanout.h"
+
 #include <boost/foreach.hpp>
+#include <boost/range/algorithm/find.hpp>
+#include <boost/bind.hpp>
 #include <typeinfo>
 
 using namespace std;
@@ -242,14 +246,51 @@ std::vector<Signal*> Netlist::primaryOutputs() const
     return m_primaryOutputs;
 }
 
+void Netlist::addSignal(Signal *s)
+{
+    // wenn es das signal schon gibt
+    // erstelle Fanout
+    //
+//    auto it = std::find( m_allSignals.begin(), m_allSignals.end(), s);
+    auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
+                  boost::bind( & Signal::compare,
+                               _1,
+                               s->name() ) );
+    if (it != m_allSignals.end())
+    {
+        Signal* foundSignal = *it;
+        Gate* oldTarget = foundSignal->target();
+
+        Fanout* f = new Fanout();
+        f->setInput(foundSignal);
+        foundSignal->setTarget(f);
+
+        Signal* afterFanout = new Signal(foundSignal->name() + "_" + std::to_string(m_allSignals.size()));
+        afterFanout->setTarget(oldTarget);
+        afterFanout->setSource(f);
+
+        boost::unordered_set<Signal*> fanoutOutputs;
+        fanoutOutputs.insert(afterFanout);
+        fanoutOutputs.insert(s);
+
+        m_allSignals.insert(afterFanout);
+
+    } else
+    {
+        m_allSignals.insert(s);
+    }
+}
+
 void Netlist::addPrimaryInput(Signal* s)
 {
     m_primaryInputs.push_back(s);
+    addSignal(s);
 }
 
 void Netlist::addPrimaryOutput(Signal* s)
 {
     m_primaryOutputs.push_back(s);
+    addSignal(s);
 }
 
 /**
@@ -275,11 +316,11 @@ void Netlist::prepare()
     //the DFFs have been collected, but we don't treat them as a gate (actually DFF is a flip flop, but in my case I don't need a new class only for the correct terminology)
 
     BOOST_FOREACH(Signal*s, m_primaryInputs) {
-        m_allSignals.push_back(s);
+        m_allSignals.insert(s);
     }
 
     BOOST_FOREACH(Signal*s, m_primaryOutputs) {
-        m_allSignals.push_back(s);
+        m_allSignals.insert(s);
     }
 
     // Für jedes input signal des Gates schauen wir, ob es ein output signal eines anderen gates ist.
@@ -299,11 +340,11 @@ void Netlist::prepare()
     //add signals to m_allSignals if they aren't already in the list (vector)
     BOOST_FOREACH(Gate*g, m_allGates) {
         if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
-           m_allSignals.push_back(g->output());
+           m_allSignals.insert(g->output());
 
         BOOST_FOREACH(Signal*s, g->inputs()) {
             if ( std::find(m_allSignals.begin(), m_allSignals.end(), s) == m_allSignals.end() )
-               m_allSignals.push_back(s);
+               m_allSignals.insert(s);
         }
 
     }
@@ -326,6 +367,21 @@ Signal *Netlist::primaryInputByName(std::string name)
             return s;
     }
     return nullptr;
+}
+
+Signal *Netlist::signalByName(const std::string& name)
+{
+
+    auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
+                  boost::bind( & Signal::compare,
+                               _1,
+                               name ) );
+    if (it != m_allSignals.end())
+    {
+        return *it;
+    } else {
+        return nullptr;
+    }
 }
 
 Signal *Netlist::primaryOutputByName(std::string name)

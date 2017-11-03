@@ -12,10 +12,13 @@ Gate::Gate()
 }
 
 Gate::Gate(std::vector<Signal *> inputs, Signal *output)
+    : m_inputs(inputs), m_output(output), m_hasPrimOutput(false)
 {
-    m_inputs = inputs;
-    m_output = output;
-    m_hasPrimOutput = false;
+    BOOST_FOREACH(Signal *s, m_inputs)
+    {
+        s->setTarget(this);
+    }
+    output->setSource(this);
 }
 
 void Gate::addInput(Signal* s)
