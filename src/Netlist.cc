@@ -1,5 +1,6 @@
 #include "Netlist.h"
 
+#include "SignalValue.h"
 #include "Fanout.h"
 
 #include <boost/foreach.hpp>
@@ -129,7 +130,7 @@ void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPa
     std::cout << "[RESULT] coverage:        " << coverage << std::endl;
 }
 
-bool Netlist::differsFromGoodResult(std::vector<Signal*> result)
+bool Netlist::differsFromGoodResult(const std::vector<Signal*> result) const
 {
     for (int i=0; i<result.size(); i++) {
         if (result[i]->value() != m_goodResult[i]->value()) {
@@ -231,7 +232,10 @@ void Netlist::assignPrimaryInputValues(const boost::dynamic_bitset<> &testPatter
 {
     for (unsigned i = 0; i<m_primaryInputs.size(); i++)
     {
-        m_primaryInputs[i]->setValue((bool)testPattern[i]);
+        BitValue v = ZERO;
+        if (testPattern[i]==1)
+            v = ONE;
+        m_primaryInputs[i]->setValue(v);
         m_primaryInputs[i]->setInitSet(true); //TODO: do we need this init_set bool?
     }
 }

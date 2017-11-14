@@ -15,8 +15,8 @@ void BUF::BUF::prettyPrint()
     std::cout << "         output: " << output()->name() << std::endl;
 }
 
-bool BUF::compute()
+SignalValue BUF::compute()
 {
-    m_output->setValue(m_inputs[0]);
+    m_output->setValue(m_inputs[0]->value());
     return m_output->value();
 }

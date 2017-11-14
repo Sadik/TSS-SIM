@@ -2,6 +2,7 @@
 
 #include "Gate.h"
 #include "SAFault.h"
+#include "SignalValue.h"
 
 #include <string>
 #include <bitset>
@@ -28,8 +29,8 @@ public:
     Gate *target() const;
     void setTarget(Gate *dest);
 
-    bool value() const;
-    void setValue(bool value);
+    SignalValue value() const;
+    void setValue(SignalValue value);
 
     bool initSet() const;
     void setInitSet(bool init_set);
@@ -51,7 +52,7 @@ private:
     bool m_isPrimary;
     Gate* m_source;
     Gate* m_target;
-    bool m_value;
+    SignalValue m_value;
     bool m_init_set;
 
 };

@@ -19,7 +19,7 @@ public:
     boost::unordered_set<Signal*> outputs() const;
     Signal *input() const;
 
-    virtual bool compute();
+    virtual SignalValue compute();
 protected:
     Signal* m_input;
     boost::unordered_set<Signal*> m_outputs;

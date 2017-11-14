@@ -39,7 +39,7 @@ boost::unordered_set<Signal *> Fanout::outputs() const
 }
 
 
-bool Fanout::compute()
+SignalValue Fanout::compute()
 {
     BOOST_FOREACH(Signal* s, m_outputs)
     {

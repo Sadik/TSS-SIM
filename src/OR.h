@@ -9,5 +9,5 @@ class OR : public Gate
 public:
     OR(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-    virtual bool compute();
+    virtual SignalValue compute();
 };

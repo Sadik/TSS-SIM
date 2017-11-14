@@ -15,12 +15,12 @@ void NOR::NOR::prettyPrint()
     std::cout << "         output: " << output()->name() << std::endl;
 }
 
-bool NOR::compute()
+SignalValue NOR::compute()
 {
-    bool o = m_inputs[0]->value();
+    SignalValue o = m_inputs[0]->value();
     BOOST_FOREACH(Signal* s, m_inputs)
     {
-        bool o = o || s->value();
+        SignalValue o = o || s->value();
     }
 
     m_output->setValue(!o);

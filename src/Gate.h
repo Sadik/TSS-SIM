@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Signal.h"
+#include "SignalValue.h"
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ public:
     Signal *output() const;
     bool outputSet() const;
     bool hasPrimOutput() const;
-    virtual bool compute();
+    virtual SignalValue compute();
     void setHasPrimOutput(bool hasPrimOutput);
     void reset();
 

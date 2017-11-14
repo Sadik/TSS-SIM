@@ -16,13 +16,13 @@ void NAND::NAND::prettyPrint()
     std::cout << "         output: " << output()->name() << std::endl;
 }
 
-bool NAND::compute()
+SignalValue NAND::compute()
 {
-    bool o = m_inputs[0]->value();
+    SignalValue o = m_inputs[0]->value();
     BOOST_FOREACH(Signal* s, m_inputs)
     {
 //        std::cout << "    " << o << " & " << s->value() << std::endl;
-        bool o = o && s->value();
+        SignalValue o = o && s->value();
     }
 
 //    std::cout << "o is " << std::boolalpha << !o << std::endl;

@@ -65,7 +65,7 @@ bool Gate::hasPrimOutput() const
     return m_hasPrimOutput;
 }
 
-bool Gate::compute()
+SignalValue Gate::compute()
 {
     std::cout << "[WRN] this method in Gate::compute should not have been called" << std::endl;
 }

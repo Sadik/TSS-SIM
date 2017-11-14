@@ -3,13 +3,13 @@
 #include <iostream>
 
 Signal::Signal()
-    : m_name(""), m_isPrimary(false), m_value(0), m_init_set(0), m_fault(NULL)
+    : m_name(""), m_isPrimary(false), m_value(ZERO), m_init_set(0), m_fault(NULL)
 {
 //    std::cout << "[WRN] Signal without name was created" << std::endl;
 }
 
 Signal::Signal(std::string name, bool isPrimary)
-    : m_name(name), m_isPrimary(isPrimary), m_value(0), m_init_set(0), m_fault(NULL)
+    : m_name(name), m_isPrimary(isPrimary), m_value(ZERO), m_init_set(0), m_fault(NULL)
 {
 }
 
@@ -59,18 +59,18 @@ void Signal::setTarget(Gate *dest)
  *
  * @return
  */
-bool Signal::value() const
+SignalValue Signal::value() const
 {
     if (m_fault == NULL)
         return m_value;
     else if (m_fault->sa()) {
-        return 1;
+        return ONE;
     } else if(!m_fault->sa()) {
-        return 0;
+        return ZERO;
     }
 }
 
-void Signal::setValue(bool value)
+void Signal::setValue(SignalValue value)
 {
     m_value = value;
     m_init_set = true;
@@ -88,7 +88,7 @@ void Signal::setInitSet(bool init_set)
 
 void Signal::reset()
 {
-    m_value = 0;
+    m_value = ZERO;
     m_init_set = false;
     m_fault = nullptr;
 }

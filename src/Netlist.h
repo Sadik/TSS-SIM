@@ -78,7 +78,7 @@ public:
 
 private:
     void createFaults();
-    bool differsFromGoodResult(std::vector<Signal *> result);
+    bool differsFromGoodResult(const std::vector<Signal *> result) const;
     SAFault *getFaultByName(std::string name);
     void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
     void resetValues();

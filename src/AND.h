@@ -9,5 +9,5 @@ class AND : public Gate
 public:
     AND(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-    virtual bool compute();
+    virtual SignalValue compute();
 };

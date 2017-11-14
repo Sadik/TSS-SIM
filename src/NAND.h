@@ -9,5 +9,5 @@ class NAND : public Gate
 public:
     NAND(std::vector<Signal*> inputs, Signal* output);
     void prettyPrint();
-    virtual bool compute();
+    virtual SignalValue compute();
 };
