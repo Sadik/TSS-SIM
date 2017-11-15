@@ -140,7 +140,9 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
         {
             output = boost::make_shared<Signal>(values_str[0]);
         }
-        std::vector< shared_ptr<Signal> > inputs;
+
+        shared_ptr<NAND> newNand = boost::make_shared<NAND>();
+        newNand->setOutput(output);
         BOOST_FOREACH(std::string signalName, values_str)
         {
             if (signalName == values_str[0]){
@@ -152,18 +154,31 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
             {
                 s = boost::make_shared<Signal>(signalName);
             }
-            inputs.push_back(s);
-            netlist->addSignal(s);
-        }
+            if (s->hasTarget())
+            {
+                // need to create a fanout
+                shared_ptr<Fanout> fanout = boost::make_shared<Fanout>();
+                fanout->setInput(s);
+                shared_ptr<Signal> afterFanout1 = boost::make_shared<Signal>(s->name() + ".1_" + std::to_string(netlist->NANDs().size()));
+                shared_ptr<Signal> afterFanout2 = boost::make_shared<Signal>(s->name() + ".2_" + std::to_string(netlist->NANDs().size()));
+                afterFanout1->setSource(fanout);
+                afterFanout2->setSource(fanout);
 
+                auto gate1 = s->target();
+                afterFanout1->setTarget(gate1);
+                gate1->replaceInput(s, afterFanout1);
 
-        shared_ptr<NAND> newNand = boost::make_shared<NAND>(inputs, output);
-        netlist->addNAND(newNand);
-        BOOST_FOREACH(auto s, inputs)
-        {
-            s->setTarget(newNand);
+                s->setTarget(fanout);
+                afterFanout2->setTarget(newNand);
+
+                newNand->addInput(afterFanout2);
+            } else {
+                inputs.push_back(s);
+                netlist->addSignal(s);
+                s->setTarget(newNand);
+                newNand->addInput(s);
+            }
         }
-        output->setSource(newNand);
     }
 }
 

@@ -18,7 +18,7 @@ public:
     Gate();
     Gate(std::vector< shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void addInput( shared_ptr<Signal> s);
-    void replaceInput( shared_ptr<Signal> withThis, boost::shared_ptr<Signal> replaceThis);
+    void replaceInput( shared_ptr<Signal> replaceThis, boost::shared_ptr<Signal> withThis);
     void setOutput( shared_ptr<Signal> s);
     bool allInputsSet() const;
     std::vector< shared_ptr<Signal> > inputs() const;

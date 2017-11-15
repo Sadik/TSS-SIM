@@ -243,46 +243,17 @@ std::vector<shared_ptr<Signal>> Netlist::primaryOutputs() const
     return m_primaryOutputs;
 }
 
-void Netlist::addSignal(shared_ptr<Signal> s)
+void Netlist::addSignal(shared_ptr<Signal> newSignal)
 {
-    // wenn es das signal schon gibt
-    // erstelle Fanout
-    //
-//    auto it = std::find( m_allSignals.begin(), m_allSignals.end(), s);
+    // wenn es das signal schon gibt, nicht hinzufügen
     auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
                   boost::bind( & Signal::compare,
                                _1,
-                               s->name() ) );
+                               newSignal->name() ) );
     if (it != m_allSignals.end())
     {
-        shared_ptr<Signal> foundSignal = *it;
-        shared_ptr<Gate> oldTarget = foundSignal->target();
-        if (!oldTarget)
-        {
-            // this signal has not been connected to the left, probably primary
-            // thus no fanout needed here
-            m_allSignals.insert(s);
-            return;
-        }
-
-        shared_ptr<Fanout> f = boost::make_shared<Fanout>();
-        f->setInput(foundSignal);
-        foundSignal->setTarget(f);
-
-        shared_ptr<Signal> afterFanout = boost::make_shared<Signal>(foundSignal->name() + "_" + std::to_string(m_allSignals.size()));
-        afterFanout->setTarget(oldTarget);
-        afterFanout->setSource(f);
-
-        boost::unordered_set< shared_ptr<Signal> > fanoutOutputs;
-        fanoutOutputs.insert(afterFanout);
-        fanoutOutputs.insert(s);
-
-        m_allSignals.insert(afterFanout);
-
-    } else
-    {
-        m_allSignals.insert(s);
-    }
+        m_allSignals.insert(newSignal);
+    } //TODO: CHECK IF TRUE
 }
 
 void Netlist::addPrimaryInput(shared_ptr<Signal> s)

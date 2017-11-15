@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "Fanout.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 #include "Netlist.h"

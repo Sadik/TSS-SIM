@@ -13,6 +13,16 @@ Signal::Signal(std::string name, bool isPrimary)
 {
 }
 
+shared_ptr<Signal> Signal::clone()
+{
+    shared_ptr<Signal> clone = make_shared<Signal>();
+    clone->setTarget(target());
+    clone->setSource(source());
+    clone->setIsPrimary(isPrimary());
+    clone->setName(name());
+    clone->setValue(value());
+}
+
 bool Signal::isPrimary()
 {
     return m_isPrimary;
@@ -41,6 +51,10 @@ shared_ptr<Gate> Signal::source() const
 void Signal::setSource(shared_ptr<Gate> source)
 {
     m_source = source;
+}
+
+bool Signal::hasTarget() const {
+    return m_target ? true : false;
 }
 
 shared_ptr<Gate> Signal::target() const

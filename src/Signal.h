@@ -17,6 +17,8 @@ public:
     Signal(std::string name, bool isPrimary = false);
 //    Signal(std::string name, Gate* source, Gate* target, bool isPrimary = false);
 
+    shared_ptr<Signal> clone();
+
     bool isPrimary();
     void setIsPrimary(bool isPrimary);
 
@@ -41,6 +43,7 @@ public:
     void setFault(SAFault *fault);
 
     bool compare(const std::string& name);
+    bool hasTarget() const;
 
     bool operator==(const shared_ptr<Signal> signal) const;
     bool operator==(const std::string &name) const;
