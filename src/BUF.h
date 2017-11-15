@@ -7,7 +7,7 @@
 class BUF : public Gate
 {
 public:
-    BUF(std::vector<Signal*> inputs, Signal* output);
+    BUF(std::vector<boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void prettyPrint();
     virtual SignalValue compute();
 };

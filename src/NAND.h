@@ -7,7 +7,7 @@
 class NAND : public Gate
 {
 public:
-    NAND(std::vector<Signal*> inputs, Signal* output);
+    NAND(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void prettyPrint();
     virtual SignalValue compute();
 };

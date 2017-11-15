@@ -5,7 +5,7 @@ inline const char * const BoolToString(bool b)
   return b ? "1" : "0";
 }
 
-SAFault::SAFault(bool sa, Signal *signal)
+SAFault::SAFault(bool sa, boost::shared_ptr<Signal> signal)
 {
     m_sa = sa;
     m_signal = signal;

@@ -7,6 +7,6 @@
 class DFF : public Gate
 {
 public:
-    DFF(std::vector<Signal*> inputs, Signal* output);
+    DFF(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void prettyPrint();
 };

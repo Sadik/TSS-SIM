@@ -1,6 +1,6 @@
 #include "NOR.h"
 
-NOR::NOR(std::vector<Signal *> inputs, Signal *output)
+NOR::NOR(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +8,7 @@ NOR::NOR(std::vector<Signal *> inputs, Signal *output)
 void NOR::NOR::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this NOR: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }
@@ -18,7 +18,7 @@ void NOR::NOR::prettyPrint()
 SignalValue NOR::compute()
 {
     SignalValue o = m_inputs[0]->value();
-    BOOST_FOREACH(Signal* s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
         SignalValue o = o || s->value();
     }

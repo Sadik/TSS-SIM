@@ -1,6 +1,6 @@
 #include "BUF.h"
 
-BUF::BUF(std::vector<Signal *> inputs, Signal *output)
+BUF::BUF(std::vector<boost::shared_ptr<Signal>> inputs, boost::shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +8,7 @@ BUF::BUF(std::vector<Signal *> inputs, Signal *output)
 void BUF::BUF::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this BUF: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }

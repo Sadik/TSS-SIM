@@ -1,6 +1,6 @@
 #include "AND.h"
 
-AND::AND(std::vector<Signal *> inputs, Signal *output)
+AND::AND(std::vector<boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +8,7 @@ AND::AND(std::vector<Signal *> inputs, Signal *output)
 void AND::AND::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this AND: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }
@@ -18,7 +18,7 @@ void AND::AND::prettyPrint()
 SignalValue AND::compute()
 {
     SignalValue o = m_inputs[0]->value();
-    BOOST_FOREACH(Signal* s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
         SignalValue o = o && s->value();
     }

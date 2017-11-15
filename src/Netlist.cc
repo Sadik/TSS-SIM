@@ -3,13 +3,6 @@
 #include "SignalValue.h"
 #include "Fanout.h"
 
-#include <boost/foreach.hpp>
-#include <boost/range/algorithm/find.hpp>
-#include <boost/bind.hpp>
-#include <typeinfo>
-
-using namespace std;
-
 Netlist::Netlist()
 {
 
@@ -26,7 +19,7 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 {
     BOOST_FOREACH(Gate* g, allGates)
     {
-        BOOST_FOREACH(Signal*s, primaryOutputs())
+        BOOST_FOREACH(auto s, primaryOutputs())
         {
             if (s->name() == g->output()->name())
             {
@@ -38,19 +31,19 @@ void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
 
 void Netlist::createFaults()
 {
-    BOOST_FOREACH(Signal*s, m_allSignals) {
+    BOOST_FOREACH(auto s, m_allSignals) {
         m_allFaults.push_back(new SAFault(1, s));
         m_allFaults.push_back(new SAFault(0, s));
     }
 }
 
-std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPattern)
+std::vector< shared_ptr<Signal> > Netlist::simulate(const boost::dynamic_bitset<> &testPattern)
 {
     //std::cout << "    [DEBUG] started simulating a pattern" << std::endl;
     if (m_primaryInputs.size() < 1 && m_primaryOutputs.size() < 1)
     {
         std::cout << "[WRN] tried to compute before parsing! Return." << std::endl;
-        return std::vector<Signal*>();
+        return std::vector< shared_ptr<Signal> >();
     }
 
     std::vector <Gate*> allGates = m_allGates;
@@ -83,7 +76,7 @@ std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPatte
     {
         if (g->hasPrimOutput())
         {
-            BOOST_FOREACH(Signal* s, primaryOutputs())
+            BOOST_FOREACH(auto s, primaryOutputs())
             {
                 if (g->output()->name() == s->name())
                 {
@@ -93,10 +86,10 @@ std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPatte
         }
     }
 
-    std::vector<Signal*> collect;
-    BOOST_FOREACH(Signal*s, primaryOutputs())
+    std::vector< shared_ptr<Signal> > collect;
+    BOOST_FOREACH(auto s, primaryOutputs())
     {
-        Signal* t = new Signal(s->name(), s->isPrimary());
+        shared_ptr<Signal> t = boost::make_shared<Signal>(s->name(), s->isPrimary());
         t->setValue(s->value());
         collect.push_back(t);
        // std::cout << "output: " << s->name() << " : " << s->value() << std::endl;
@@ -111,7 +104,7 @@ std::vector<Signal *> Netlist::simulate(const boost::dynamic_bitset<> &testPatte
     return collect;
 }
 
-bool Netlist::sortSignals (Signal* i, Signal* j) {
+bool Netlist::sortSignals (shared_ptr<Signal> i, shared_ptr<Signal> j) {
     return (i->name() < j->name());
 }
 
@@ -130,7 +123,7 @@ void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPa
     std::cout << "[RESULT] coverage:        " << coverage << std::endl;
 }
 
-bool Netlist::differsFromGoodResult(const std::vector<Signal*> result) const
+bool Netlist::differsFromGoodResult(const std::vector< shared_ptr<Signal> > result) const
 {
     for (int i=0; i<result.size(); i++) {
         if (result[i]->value() != m_goodResult[i]->value()) {
@@ -153,9 +146,9 @@ void Netlist::compute(const boost::dynamic_bitset<> &testPattern)
 {
     m_goodResult = simulate(testPattern);
 
-    std::vector<Signal*> currentResult;
+    std::vector< shared_ptr<Signal> > currentResult;
 
-    BOOST_FOREACH(Signal*s, m_allSignals) {
+    BOOST_FOREACH(auto s, m_allSignals) {
 
         SAFault* sa0 = getFaultByName(s->name()+"-sa0");
         s->setFault(sa0); //stuck at 0
@@ -194,7 +187,7 @@ SAFault* Netlist::getFaultByName(std::string name) {
  */
 void::Netlist::resetValues()
 {
-    BOOST_FOREACH(Signal*s, m_allSignals) {
+    BOOST_FOREACH(auto s, m_allSignals) {
         s->reset();
     }
 
@@ -240,17 +233,17 @@ void Netlist::assignPrimaryInputValues(const boost::dynamic_bitset<> &testPatter
     }
 }
 
-std::vector<Signal*> Netlist::primaryInputs() const
+std::vector<shared_ptr<Signal>> Netlist::primaryInputs() const
 {
     return m_primaryInputs;
 }
 
-std::vector<Signal*> Netlist::primaryOutputs() const
+std::vector<shared_ptr<Signal>> Netlist::primaryOutputs() const
 {
     return m_primaryOutputs;
 }
 
-void Netlist::addSignal(Signal *s)
+void Netlist::addSignal(shared_ptr<Signal> s)
 {
     // wenn es das signal schon gibt
     // erstelle Fanout
@@ -262,7 +255,7 @@ void Netlist::addSignal(Signal *s)
                                s->name() ) );
     if (it != m_allSignals.end())
     {
-        Signal* foundSignal = *it;
+        shared_ptr<Signal> foundSignal = *it;
         Gate* oldTarget = foundSignal->target();
         if (!oldTarget)
         {
@@ -276,11 +269,11 @@ void Netlist::addSignal(Signal *s)
         f->setInput(foundSignal);
         foundSignal->setTarget(f);
 
-        Signal* afterFanout = new Signal(foundSignal->name() + "_" + std::to_string(m_allSignals.size()));
+        shared_ptr<Signal> afterFanout = boost::make_shared<Signal>(foundSignal->name() + "_" + std::to_string(m_allSignals.size()));
         afterFanout->setTarget(oldTarget);
         afterFanout->setSource(f);
 
-        boost::unordered_set<Signal*> fanoutOutputs;
+        boost::unordered_set< shared_ptr<Signal> > fanoutOutputs;
         fanoutOutputs.insert(afterFanout);
         fanoutOutputs.insert(s);
 
@@ -292,13 +285,13 @@ void Netlist::addSignal(Signal *s)
     }
 }
 
-void Netlist::addPrimaryInput(Signal* s)
+void Netlist::addPrimaryInput(shared_ptr<Signal> s)
 {
     m_primaryInputs.push_back(s);
     addSignal(s);
 }
 
-void Netlist::addPrimaryOutput(Signal* s)
+void Netlist::addPrimaryOutput(shared_ptr<Signal> s)
 {
     m_primaryOutputs.push_back(s);
     addSignal(s);
@@ -326,18 +319,18 @@ void Netlist::prepare()
     m_allGates.insert( m_allGates.end(), m_NANDs.begin(), m_NANDs.end() );
     //the DFFs have been collected, but we don't treat them as a gate (actually DFF is a flip flop, but in my case I don't need a new class only for the correct terminology)
 
-    BOOST_FOREACH(Signal*s, m_primaryInputs) {
+    BOOST_FOREACH(auto s, m_primaryInputs) {
         m_allSignals.insert(s);
     }
 
-    BOOST_FOREACH(Signal*s, m_primaryOutputs) {
+    BOOST_FOREACH(auto s, m_primaryOutputs) {
         m_allSignals.insert(s);
     }
 
     // Für jedes input signal des Gates schauen wir, ob es ein output signal eines anderen gates ist.
     // Dann verbinden wir sie.
     BOOST_FOREACH(Gate*g, m_allGates) {
-        BOOST_FOREACH(Signal *s, g->inputs()) {
+        BOOST_FOREACH(auto s, g->inputs()) {
             BOOST_FOREACH(Gate*h, m_allGates) {
                 if (g == h)
                     continue;
@@ -353,7 +346,7 @@ void Netlist::prepare()
         if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
            m_allSignals.insert(g->output());
 
-        BOOST_FOREACH(Signal*s, g->inputs()) {
+        BOOST_FOREACH(auto s, g->inputs()) {
             if ( std::find(m_allSignals.begin(), m_allSignals.end(), s) == m_allSignals.end() )
                m_allSignals.insert(s);
         }
@@ -370,9 +363,9 @@ void Netlist::prepare()
     }*/
 }
 
-Signal *Netlist::primaryInputByName(std::string name)
+shared_ptr<Signal> Netlist::primaryInputByName(std::string name)
 {
-    BOOST_FOREACH(Signal* s, m_primaryInputs)
+    BOOST_FOREACH(auto s, m_primaryInputs)
     {
         if (s->name() == name)
             return s;
@@ -380,7 +373,7 @@ Signal *Netlist::primaryInputByName(std::string name)
     return nullptr;
 }
 
-Signal *Netlist::signalByName(const std::string& name)
+shared_ptr<Signal> Netlist::signalByName(const std::string& name)
 {
 
     auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
@@ -395,9 +388,9 @@ Signal *Netlist::signalByName(const std::string& name)
     }
 }
 
-Signal *Netlist::primaryOutputByName(std::string name)
+shared_ptr<Signal> Netlist::primaryOutputByName(std::string name)
 {
-    BOOST_FOREACH(Signal* s, m_primaryOutputs)
+    BOOST_FOREACH(auto s, m_primaryOutputs)
     {
         if (s->name() == name)
             return s;
@@ -488,7 +481,7 @@ void Netlist::prettyPrintInfos()
 
     if (primaryInputs().size() >= 1){
         cout << "[STAT]    inputs: ";
-        BOOST_FOREACH(Signal* s, primaryInputs())
+        BOOST_FOREACH(auto s, primaryInputs())
         {
             cout << s->name() << " ";
         }
@@ -496,7 +489,7 @@ void Netlist::prettyPrintInfos()
     }
     if (primaryOutputs().size() >= 1){
         cout << "[STAT]    outputs: ";
-        BOOST_FOREACH(Signal* s, primaryOutputs())
+        BOOST_FOREACH(auto s, primaryOutputs())
         {
             cout << s->name() << " ";
         }

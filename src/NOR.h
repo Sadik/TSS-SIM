@@ -7,7 +7,7 @@
 class NOR : public Gate
 {
 public:
-    NOR(std::vector<Signal*> inputs, Signal* output);
+    NOR(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void prettyPrint();
     virtual SignalValue compute();
 };

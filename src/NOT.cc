@@ -1,6 +1,6 @@
 #include "NOT.h"
 
-NOT::NOT(std::vector<Signal *> inputs, Signal *output)
+NOT::NOT(std::vector<boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +8,7 @@ NOT::NOT(std::vector<Signal *> inputs, Signal *output)
 void NOT::NOT::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this NOT: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }

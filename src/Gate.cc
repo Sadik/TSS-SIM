@@ -11,46 +11,46 @@ Gate::Gate()
 
 }
 
-Gate::Gate(std::vector<Signal *> inputs, Signal *output)
+Gate::Gate(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : m_inputs(inputs), m_output(output), m_hasPrimOutput(false)
 {
-    BOOST_FOREACH(Signal *s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
         s->setTarget(this);
     }
     output->setSource(this);
 }
 
-void Gate::addInput(Signal* s)
+void Gate::addInput(boost::shared_ptr<Signal> s)
 {
     m_inputs.push_back(s);
 }
 
-void Gate::replaceInput(Signal *replaceThis, Signal *withThis)
+void Gate::replaceInput( shared_ptr<Signal> replaceThis, shared_ptr<Signal> withThis)
 {
     std::replace(m_inputs.begin(), m_inputs.end(), replaceThis, withThis);
 }
 
-void Gate::setOutput(Signal* s)
+void Gate::setOutput(boost::shared_ptr<Signal> s)
 {
     m_output = s;
 }
 
 bool Gate::allInputsSet() const
 {
-    BOOST_FOREACH(Signal* input, m_inputs) {
+    BOOST_FOREACH(auto input, m_inputs) {
         if (!input->initSet())
             return false;
     }
     return true;
 }
 
-std::vector<Signal*> Gate::inputs() const
+std::vector< boost::shared_ptr<Signal> > Gate::inputs() const
 {
     return m_inputs;
 }
 
-Signal *Gate::output() const
+boost::shared_ptr<Signal> Gate::output() const
 {
     return m_output;
 }
@@ -77,7 +77,7 @@ void Gate::setHasPrimOutput(bool hasPrimOutput)
 
 void Gate::reset()
 {
-    BOOST_FOREACH(Signal* s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
         s->reset();
     }

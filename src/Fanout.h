@@ -12,17 +12,17 @@ class Fanout : public Gate
 {
 public:
     Fanout();
-    Fanout(Signal* input, boost::unordered_set<Signal*> outputs);
-    void addOutput(Signal* s);
-    void setInput(Signal* s);
+    Fanout(shared_ptr<Signal> input, boost::unordered_set<shared_ptr<Signal> > outputs);
+    void addOutput(shared_ptr<Signal> s);
+    void setInput(shared_ptr<Signal> s);
 
-    boost::unordered_set<Signal*> outputs() const;
-    Signal *input() const;
+    boost::unordered_set<shared_ptr<Signal> > outputs() const;
+    shared_ptr<Signal> input() const;
 
     virtual SignalValue compute();
 protected:
-    Signal* m_input;
-    boost::unordered_set<Signal*> m_outputs;
+    shared_ptr<Signal> m_input;
+    boost::unordered_set< shared_ptr<Signal> > m_outputs;
 private:
     bool m_hasPrimOutput;
 };

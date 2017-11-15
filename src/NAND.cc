@@ -1,6 +1,8 @@
 #include "NAND.h"
 
-NAND::NAND(std::vector<Signal *> inputs, Signal *output)
+using namespace boost;
+
+NAND::NAND(std::vector<shared_ptr<Signal> > inputs, shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +10,7 @@ NAND::NAND(std::vector<Signal *> inputs, Signal *output)
 void NAND::NAND::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this NAND: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }
@@ -19,7 +21,7 @@ void NAND::NAND::prettyPrint()
 SignalValue NAND::compute()
 {
     SignalValue o = m_inputs[0]->value();
-    BOOST_FOREACH(Signal* s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
 //        std::cout << "    " << o << " & " << s->value() << std::endl;
         SignalValue o = o && s->value();

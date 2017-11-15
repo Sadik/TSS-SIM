@@ -7,7 +7,7 @@
 class NOT : public Gate
 {
 public:
-    NOT(std::vector<Signal*> inputs, Signal* output);
+    NOT(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
     void prettyPrint();
     virtual SignalValue compute();
 };

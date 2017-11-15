@@ -1,6 +1,6 @@
 #include "OR.h"
 
-OR::OR(std::vector<Signal *> inputs, Signal *output)
+OR::OR(std::vector<boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : Gate(inputs, output)
 {
 }
@@ -8,7 +8,7 @@ OR::OR(std::vector<Signal *> inputs, Signal *output)
 void OR::OR::prettyPrint()
 {
     std::cout << "[DEBUG] inputs of this OR: ";
-    BOOST_FOREACH(Signal* s, inputs())
+    BOOST_FOREACH(auto s, inputs())
     {
         std::cout << s->name() << " ";
     }
@@ -18,7 +18,7 @@ void OR::OR::prettyPrint()
 SignalValue OR::compute()
 {
     SignalValue o = m_inputs[0]->value();
-    BOOST_FOREACH(Signal* s, m_inputs)
+    BOOST_FOREACH(auto s, m_inputs)
     {
         SignalValue o = o || s->value();
     }

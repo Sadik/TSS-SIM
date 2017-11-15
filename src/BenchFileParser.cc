@@ -21,15 +21,16 @@
 #include <boost/spirit/include/qi_match.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/spirit/version.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
-
+using namespace boost;
 using namespace boost::spirit::classic;
 namespace qi = boost::spirit::qi;
-using namespace std;
 
 BenchFileParser::BenchFileParser(const std::string benchFile, Netlist* netlist)
 {
-    cout << "[INFO] BenchFileParser created" << endl;
+    std::cout << "[INFO] BenchFileParser created" << std::endl;
     parseBenchFile(benchFile, netlist);
 }
 
@@ -50,7 +51,7 @@ void BenchFileParser::parsePrims(const std::string& line, Netlist* netlist)
 
     if (i_result && values_str.size() == 1)
     {
-        netlist->addPrimaryInput(new Signal(values_str[0], true));
+        netlist->addPrimaryInput(boost::make_shared<Signal>(values_str[0], true));
     }
 
     //outputs section
@@ -61,7 +62,7 @@ void BenchFileParser::parsePrims(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] o_result: " << std::boolalpha << o_result << endl;
     if (o_result && values_str.size() == 1)
     {
-        netlist->addPrimaryOutput(new Signal(values_str[0], true));
+        netlist->addPrimaryOutput(boost::make_shared<Signal>(values_str[0], true));
     }
 }
 
@@ -85,24 +86,24 @@ void BenchFileParser::parseANDs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] and_result: " << std::boolalpha << and_result << endl;
     if (and_result)
     {
-        Signal* so = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal> so = netlist->signalByName(values_str[0]);
         if (!so)
         {
-            so = new Signal(values_str[0]);
+            so = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
+        std::vector< shared_ptr<Signal> > inputs;
         BOOST_FOREACH(std::string signalName, values_str)
         {
             //the first value stored in values_str is the output signal.
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->signalByName(signalName);
+            boost::shared_ptr<Signal> s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
             } else {
-                inputs.push_back(new Signal(signalName));
+                inputs.push_back(boost::make_shared<Signal>(signalName));
             }
         }
 
@@ -128,22 +129,22 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
     if (nand_result)
     {
 //        Signal* output = netlist->primaryOutputByName(values_str[0]);
-        Signal* output = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal> output = netlist->signalByName(values_str[0]);
         if (!output)
         {
-            output = new Signal(values_str[0]);
+            output = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
+        std::vector< shared_ptr<Signal> > inputs;
         BOOST_FOREACH(std::string signalName, values_str)
         {
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->signalByName(signalName);
+            shared_ptr<Signal> s = netlist->signalByName(signalName);
 //            Signal* s = netlist->primaryInputByName(signalName);
             if (!s)
             {
-                s = new Signal(signalName);
+                s = boost::make_shared<Signal>(signalName);
             }
             inputs.push_back(s);
             netlist->addSignal(s);
@@ -170,23 +171,23 @@ void BenchFileParser::parseORs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] or_result: " << std::boolalpha << or_result << endl;
     if (or_result)
     {
-        Signal* so = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal>  so = netlist->signalByName(values_str[0]);
         if (!so)
         {
-            so = new Signal(values_str[0]);
+            so = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
+        std::vector< boost::shared_ptr<Signal> > inputs;
         BOOST_FOREACH(std::string signalName, values_str)
         {
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->signalByName(signalName);
+            shared_ptr<Signal> s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
             } else {
-                inputs.push_back(new Signal(signalName));
+                inputs.push_back(boost::make_shared<Signal>(signalName));
             }
         }
 
@@ -210,23 +211,23 @@ void BenchFileParser::parseNORs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] nor_result: " << std::boolalpha << nor_result << endl;
     if (nor_result)
     {
-        Signal* so = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal> so = netlist->signalByName(values_str[0]);
         if (!so)
         {
-            so = new Signal(values_str[0]);
+            so = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
+        std::vector< boost::shared_ptr<Signal> > inputs;
         BOOST_FOREACH(std::string signalName, values_str)
         {
             if (signalName == values_str[0]){
                 continue;
             }
-            Signal* s = netlist->signalByName(signalName);
+            shared_ptr<Signal>  s = netlist->signalByName(signalName);
             if (s)
             {
                 inputs.push_back(s);
             } else {
-                inputs.push_back(new Signal(signalName));
+                inputs.push_back(boost::make_shared<Signal>(signalName));
             }
         }
 
@@ -250,16 +251,16 @@ void BenchFileParser::parseNOTs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] not_result: " << std::boolalpha << not_result << endl;
     if (not_result && values_str.size() == 2)
     {
-        Signal* so = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal> so = netlist->signalByName(values_str[0]);
         if (!so)
         {
-            so = new Signal(values_str[0]);
+            so = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
-        Signal* si = netlist->signalByName(values_str[1]);
+        std::vector< shared_ptr<Signal> > inputs;
+        boost::shared_ptr<Signal> si = netlist->signalByName(values_str[1]);
         if (!si)
         {
-            si = new Signal(values_str[1]);
+            si = boost::make_shared<Signal>(values_str[1]);
         }
         inputs.push_back(si);
 
@@ -283,16 +284,16 @@ void BenchFileParser::parseBUFs(const std::string& line, Netlist* netlist)
 //        cout << "[DEBUG] buf_result: " << std::boolalpha << buf_result << endl;
     if (buf_result && values_str.size() == 2)
     {
-        Signal* so = netlist->signalByName(values_str[0]);
+        shared_ptr<Signal> so = netlist->signalByName(values_str[0]);
         if (!so)
         {
-            so = new Signal(values_str[0]);
+            so = boost::make_shared<Signal>(values_str[0]);
         }
-        vector<Signal*> inputs;
-        Signal* si = netlist->signalByName(values_str[1]);
+        std::vector< shared_ptr<Signal> > inputs;
+        shared_ptr<Signal> si = netlist->signalByName(values_str[1]);
         if (!si)
         {
-            si = new Signal(values_str[1]);
+            si = boost::make_shared<Signal>(values_str[1]);
         }
         inputs.push_back(si);
 
@@ -316,16 +317,16 @@ void BenchFileParser::parseDFFs(const std::string& line, Netlist* netlist)
         //simplification
         //cout << "[DEBUG] [0]: " << values_str[0] << endl;
         // cout << "[DEBUG] [1]: " << values_str[1] << endl;
-        Signal* so = netlist->primaryOutputByName(values_str[1]);
+        shared_ptr<Signal> so = netlist->primaryOutputByName(values_str[1]);
         if(!so)
         {
-            netlist->addPrimaryOutput(new Signal(values_str[1], true));
+            netlist->addPrimaryOutput(boost::make_shared<Signal>(values_str[1], true));
         }
 
         so = netlist->primaryInputByName(values_str[0]);
         if(!so)
         {
-            netlist->addPrimaryInput(new Signal(values_str[0], true));
+            netlist->addPrimaryInput(boost::make_shared<Signal>(values_str[0], true));
         }
     }
 }
@@ -339,7 +340,7 @@ void BenchFileParser::parseDFFs(const std::string& line, Netlist* netlist)
  *
  * @param inputFile file in bench format
  */
-void BenchFileParser::parseBenchFile(const string &inputFile, Netlist* netlist)
+void BenchFileParser::parseBenchFile(const std::string &inputFile, Netlist* netlist)
 {
     std::cout << "[INFO] reading bench file" << std::endl;
 
