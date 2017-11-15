@@ -264,6 +264,13 @@ void Netlist::addSignal(Signal *s)
     {
         Signal* foundSignal = *it;
         Gate* oldTarget = foundSignal->target();
+        if (!oldTarget)
+        {
+            // this signal has not been connected to the left, probably primary
+            // thus no fanout needed here
+            m_allSignals.insert(s);
+            return;
+        }
 
         Fanout* f = new Fanout();
         f->setInput(foundSignal);

@@ -15,9 +15,10 @@ public:
 
     SignalValue operator&&(const SignalValue sigValue) const;
     SignalValue operator||(const SignalValue sigValue) const;
+    inline bool operator==(const BitValue bitValue) const { return m_bitValue == bitValue; }
     inline bool operator==(const SignalValue sigValue) const { return m_bitValue == sigValue.bitValue(); }
     inline bool operator !=(const SignalValue &sigValue) const { return m_bitValue != sigValue.bitValue(); }
-    SignalValue operator!();
+    SignalValue& operator~();
 
 private:
     BitValue m_bitValue;

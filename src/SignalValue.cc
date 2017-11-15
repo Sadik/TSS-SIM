@@ -110,19 +110,20 @@ SignalValue SignalValue::operator||(const SignalValue sigValue) const
     }
 }
 
-SignalValue SignalValue::operator!()
+SignalValue& SignalValue::operator~()
 {
     switch(m_bitValue)
     {
         case ZERO:
-            return ONE;
+            m_bitValue = ONE;
         case ONE:
-            return ZERO;
+            m_bitValue = ZERO;
         case D:
-            return D_;
+            m_bitValue = D_;
         case D_:
-            return D;
+            m_bitValue = D;
         case X:
-            return X;
+            m_bitValue = X;
     }
+    return *this;
 }

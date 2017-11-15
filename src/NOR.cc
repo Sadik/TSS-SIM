@@ -23,6 +23,6 @@ SignalValue NOR::compute()
         SignalValue o = o || s->value();
     }
 
-    m_output->setValue(!o);
+    m_output->setValue(~o);
     return m_output->value();
 }

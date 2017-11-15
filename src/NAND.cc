@@ -27,7 +27,7 @@ SignalValue NAND::compute()
 
 //    std::cout << "o is " << std::boolalpha << !o << std::endl;
 
-    m_output->setValue(!o);
+    m_output->setValue(~o);
     return m_output->value();
 }
 

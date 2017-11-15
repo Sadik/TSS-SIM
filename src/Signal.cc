@@ -3,13 +3,13 @@
 #include <iostream>
 
 Signal::Signal()
-    : m_name(""), m_isPrimary(false), m_value(ZERO), m_init_set(0), m_fault(NULL)
+    : m_name(""), m_isPrimary(false), m_value(ZERO), m_target(NULL), m_source(NULL), m_init_set(0), m_fault(NULL)
 {
 //    std::cout << "[WRN] Signal without name was created" << std::endl;
 }
 
 Signal::Signal(std::string name, bool isPrimary)
-    : m_name(name), m_isPrimary(isPrimary), m_value(ZERO), m_init_set(0), m_fault(NULL)
+    : m_name(name), m_isPrimary(isPrimary), m_value(ZERO), m_target(NULL), m_source(NULL), m_init_set(0), m_fault(NULL)
 {
 }
 
