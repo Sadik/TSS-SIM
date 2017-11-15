@@ -33,24 +33,24 @@ void Signal::setName(const std::string &name)
     m_name = name;
 }
 
-Gate *Signal::source() const
+shared_ptr<Gate> Signal::source() const
 {
     return m_source;
 }
 
-void Signal::setSource(Gate *source)
+void Signal::setSource(shared_ptr<Gate> source)
 {
     m_source = source;
 }
 
-Gate* Signal::target() const
+shared_ptr<Gate> Signal::target() const
 {
     return m_target;
 }
 
-void Signal::setTarget(Gate *dest)
+void Signal::setTarget(shared_ptr<Gate> target)
 {
-    m_target = dest;
+    m_target = target;
 }
 
 /**
@@ -113,7 +113,7 @@ bool Signal::operator==(const std::string& name) const
     return this->name() == name;
 }
 
-bool Signal::operator==(const Signal* signal) const
+bool Signal::operator==(const shared_ptr<Signal> signal) const
 {
     return this->name() == signal->name();
 }

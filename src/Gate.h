@@ -6,21 +6,23 @@
 #include <string>
 #include <vector>
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
-class Signal;
+using boost::shared_ptr;
 
-class Gate
+class Signal;
+class Gate : public boost::enable_shared_from_this<Gate>
 {
 public:
     Gate();
-    Gate(std::vector<boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
-    void addInput(boost::shared_ptr<Signal> s);
-    void replaceInput(boost::shared_ptr<Signal> withThis, boost::shared_ptr<Signal> replaceThis);
-    void setOutput(boost::shared_ptr<Signal> s);
+    Gate(std::vector< shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output);
+    void addInput( shared_ptr<Signal> s);
+    void replaceInput( shared_ptr<Signal> withThis, boost::shared_ptr<Signal> replaceThis);
+    void setOutput( shared_ptr<Signal> s);
     bool allInputsSet() const;
-    std::vector<boost::shared_ptr<Signal> > inputs() const;
-    boost::shared_ptr<Signal> output() const;
+    std::vector< shared_ptr<Signal> > inputs() const;
+    shared_ptr<Signal> output() const;
     bool outputSet() const;
     bool hasPrimOutput() const;
     virtual SignalValue compute();
@@ -28,8 +30,9 @@ public:
     void reset();
 
 protected:
-    std::vector< boost::shared_ptr<Signal> > m_inputs;
-    boost::shared_ptr<Signal> m_output;
+    std::vector< shared_ptr<Signal> > m_inputs;
+    shared_ptr<Signal> m_output;
+    using boost::enable_shared_from_this<Gate>::shared_from_this;
 private:
     bool m_hasPrimOutput;
 };

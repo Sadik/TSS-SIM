@@ -69,20 +69,20 @@ public:
     shared_ptr<Signal> primaryInputByName(std::string name);
     shared_ptr<Signal> primaryOutputByName(std::string name);
 
-    std::vector<AND *> ANDs() const;
-    std::vector<BUF *> BUFs() const;
-    std::vector<NAND *> NANDs() const;
-    std::vector<NOR *> NORs() const;
-    std::vector<NOT *> NOTs() const;
-    std::vector<OR *> ORs() const;
+    std::vector< shared_ptr<AND> > ANDs() const;
+    std::vector< shared_ptr<BUF> > BUFs() const;
+    std::vector< shared_ptr<NAND> > NANDs() const;
+    std::vector< shared_ptr<NOR> > NORs() const;
+    std::vector< shared_ptr<NOT> > NOTs() const;
+    std::vector< shared_ptr<OR> > ORs() const;
 
-    void addAND(AND* a);
-    void addBUF(BUF *buf);
-    void addDFF(DFF *dff);
-    void addNAND(NAND* n);
-    void addNOR(NOR *no);
-    void addNOT(NOT *nt);
-    void addOR(OR *o);
+    void addAND(shared_ptr<AND> a);
+    void addBUF(shared_ptr<BUF> buf);
+    void addDFF(shared_ptr<DFF> dff);
+    void addNAND(shared_ptr<NAND> n);
+    void addNOR(shared_ptr<NOR> no);
+    void addNOT(shared_ptr<NOT> nt);
+    void addOR(shared_ptr<OR> o);
 
     void startSimulation(const std::vector<boost::dynamic_bitset<> > &testPattern);
     void prettyPrintInfos();
@@ -91,22 +91,22 @@ private:
     void createFaults();
     bool differsFromGoodResult(const std::vector< shared_ptr<Signal> > result) const;
     SAFault *getFaultByName(std::string name);
-    void prepareGatesWithPrimOutput(std::vector <Gate*> allGates);
+    void prepareGatesWithPrimOutput(std::vector<shared_ptr<Gate> > allGates);
     void resetValues();
     bool sortSignals(shared_ptr<Signal> i, shared_ptr<Signal> j);
 private:
     std::vector< shared_ptr<Signal> > m_goodResult;
     std::vector< shared_ptr<Signal> > m_primaryInputs;
     std::vector< shared_ptr<Signal> > m_primaryOutputs;
-    std::vector <Gate*> m_allGates;
+    std::vector< shared_ptr<Gate> > m_allGates;
     boost::unordered_set< shared_ptr<Signal>, SignalHash, SignalEqual> m_allSignals;
     std::vector <SAFault*> m_allFaults;
     std::vector <SAFault*> m_detectedFaults;
-    std::vector<AND*> m_ANDs;
-    std::vector<NAND*> m_NANDs;
-    std::vector<OR*> m_ORs;
-    std::vector<NOR*> m_NORs;
-    std::vector<NOT*> m_NOTs;
-    std::vector<BUF*> m_BUFs;
-    std::vector<DFF*> m_DFFs;
+    std::vector< shared_ptr<AND> > m_ANDs;
+    std::vector< shared_ptr<NAND> > m_NANDs;
+    std::vector< shared_ptr<OR> > m_ORs;
+    std::vector< shared_ptr<NOR> > m_NORs;
+    std::vector< shared_ptr<NOT> > m_NOTs;
+    std::vector< shared_ptr<BUF> > m_BUFs;
+    std::vector< shared_ptr<DFF> > m_DFFs;
 };

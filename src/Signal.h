@@ -23,11 +23,11 @@ public:
     std::string name() const;
     void setName(const std::string &name);
 
-    Gate *source() const;
-    void setSource(Gate *source);
+    shared_ptr<Gate> source() const;
+    void setSource(shared_ptr<Gate> source);
 
-    Gate *target() const;
-    void setTarget(Gate *dest);
+    shared_ptr<Gate> target() const;
+    void setTarget(shared_ptr<Gate> target);
 
     SignalValue value() const;
     void setValue(SignalValue value);
@@ -42,7 +42,7 @@ public:
 
     bool compare(const std::string& name);
 
-    bool operator==(const Signal* signal) const;
+    bool operator==(const shared_ptr<Signal> signal) const;
     bool operator==(const std::string &name) const;
     bool operator==(const Signal& signal) const;
 
@@ -50,8 +50,8 @@ private:
     SAFault* m_fault;
     std::string m_name;
     bool m_isPrimary;
-    Gate* m_source;
-    Gate* m_target;
+    shared_ptr<Gate> m_source;
+    shared_ptr<Gate> m_target;
     SignalValue m_value;
     bool m_init_set;
 

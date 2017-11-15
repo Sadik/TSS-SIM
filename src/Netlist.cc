@@ -15,9 +15,9 @@ Netlist::Netlist()
  *
  * @param allGates
  */
-void Netlist::prepareGatesWithPrimOutput(std::vector <Gate*> allGates)
+void Netlist::prepareGatesWithPrimOutput(std::vector < shared_ptr<Gate> > allGates)
 {
-    BOOST_FOREACH(Gate* g, allGates)
+    BOOST_FOREACH(auto g, allGates)
     {
         BOOST_FOREACH(auto s, primaryOutputs())
         {
@@ -46,15 +46,15 @@ std::vector< shared_ptr<Signal> > Netlist::simulate(const boost::dynamic_bitset<
         return std::vector< shared_ptr<Signal> >();
     }
 
-    std::vector <Gate*> allGates = m_allGates;
+    std::vector < shared_ptr<Gate> > allGates = m_allGates;
     assignPrimaryInputValues(testPattern);
 
     /* when a gate's output signal is set, the gate is deleted from this vector */
     while(!allGates.empty())
     {
-        BOOST_FOREACH(Gate* currentGate, allGates)
+        BOOST_FOREACH(auto currentGate, allGates)
         {
-            if (currentGate->allInputsSet())
+            if (currentGate && currentGate->allInputsSet())
             {
                 currentGate->output()->setValue(currentGate->compute());
                 /**
@@ -72,7 +72,7 @@ std::vector< shared_ptr<Signal> > Netlist::simulate(const boost::dynamic_bitset<
     }
 
     /* set primary output values */
-    BOOST_FOREACH(Gate* g, allGates)
+    BOOST_FOREACH(auto g, allGates)
     {
         if (g->hasPrimOutput())
         {
@@ -191,27 +191,27 @@ void::Netlist::resetValues()
         s->reset();
     }
 
-    BOOST_FOREACH(Gate* s, m_ANDs)
+    BOOST_FOREACH(auto s, m_ANDs)
     {
         s->reset();
     }
-    BOOST_FOREACH(Gate* s, m_NANDs)
+    BOOST_FOREACH(auto s, m_NANDs)
     {
         s->reset();
     }
-    BOOST_FOREACH(Gate* s, m_ORs)
+    BOOST_FOREACH(auto s, m_ORs)
     {
         s->reset();
     }
-    BOOST_FOREACH(Gate* s, m_NORs)
+    BOOST_FOREACH(auto s, m_NORs)
     {
         s->reset();
     }
-    BOOST_FOREACH(Gate* s, m_NOTs)
+    BOOST_FOREACH(auto s, m_NOTs)
     {
         s->reset();
     }
-    BOOST_FOREACH(Gate* s, m_BUFs)
+    BOOST_FOREACH(auto s, m_BUFs)
     {
         s->reset();
     }
@@ -256,7 +256,7 @@ void Netlist::addSignal(shared_ptr<Signal> s)
     if (it != m_allSignals.end())
     {
         shared_ptr<Signal> foundSignal = *it;
-        Gate* oldTarget = foundSignal->target();
+        shared_ptr<Gate> oldTarget = foundSignal->target();
         if (!oldTarget)
         {
             // this signal has not been connected to the left, probably primary
@@ -265,7 +265,7 @@ void Netlist::addSignal(shared_ptr<Signal> s)
             return;
         }
 
-        Fanout* f = new Fanout();
+        shared_ptr<Fanout> f = boost::make_shared<Fanout>();
         f->setInput(foundSignal);
         foundSignal->setTarget(f);
 
@@ -329,9 +329,9 @@ void Netlist::prepare()
 
     // Für jedes input signal des Gates schauen wir, ob es ein output signal eines anderen gates ist.
     // Dann verbinden wir sie.
-    BOOST_FOREACH(Gate*g, m_allGates) {
+    BOOST_FOREACH(auto g, m_allGates) {
         BOOST_FOREACH(auto s, g->inputs()) {
-            BOOST_FOREACH(Gate*h, m_allGates) {
+            BOOST_FOREACH(auto h, m_allGates) {
                 if (g == h)
                     continue;
                 if (s->name() == h->output()->name()) {
@@ -342,7 +342,7 @@ void Netlist::prepare()
     }
 
     //add signals to m_allSignals if they aren't already in the list (vector)
-    BOOST_FOREACH(Gate*g, m_allGates) {
+    BOOST_FOREACH(auto g, m_allGates) {
         if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
            m_allSignals.insert(g->output());
 
@@ -398,68 +398,67 @@ shared_ptr<Signal> Netlist::primaryOutputByName(std::string name)
     return nullptr;
 }
 
-std::vector<AND *> Netlist::ANDs() const
+std::vector< shared_ptr<AND> > Netlist::ANDs() const
 {
     return m_ANDs;
 }
 
-std::vector<BUF *> Netlist::BUFs() const
+std::vector< shared_ptr<BUF> > Netlist::BUFs() const
 {
     return m_BUFs;
 }
 
-std::vector<NAND *> Netlist::NANDs() const
+std::vector< shared_ptr<NAND> > Netlist::NANDs() const
 {
     return m_NANDs;
 }
 
-std::vector<NOR *> Netlist::NORs() const
+std::vector< shared_ptr<NOR> > Netlist::NORs() const
 {
     return m_NORs;
 }
 
-std::vector<NOT *> Netlist::NOTs() const
+std::vector< shared_ptr<NOT> > Netlist::NOTs() const
 {
     return m_NOTs;
 }
 
-std::vector<OR *> Netlist::ORs() const
+std::vector< shared_ptr<OR> > Netlist::ORs() const
 {
     return m_ORs;
 }
 
-void Netlist::addAND(AND *a)
+void Netlist::addAND(shared_ptr<AND> a)
 {
     m_ANDs.push_back(a);
 }
 
-void Netlist::addNAND(NAND *n)
+void Netlist::addNAND(shared_ptr<NAND> n)
 {
     m_NANDs.push_back(n);
 }
 
-void Netlist::addOR(OR *o)
+void Netlist::addOR(shared_ptr<OR> o)
 {
     m_ORs.push_back(o);
 }
 
-
-void Netlist::addNOR(NOR *no)
+void Netlist::addNOR(shared_ptr<NOR> no)
 {
     m_NORs.push_back(no);
 }
 
-void Netlist::addNOT(NOT *nt)
+void Netlist::addNOT(shared_ptr<NOT> nt)
 {
     m_NOTs.push_back(nt);
 }
 
-void Netlist::addBUF(BUF *buf)
+void Netlist::addBUF(shared_ptr<BUF> buf)
 {
     m_BUFs.push_back(buf);
 }
 
-void Netlist::addDFF(DFF *dff)
+void Netlist::addDFF(shared_ptr<DFF> dff)
 {
     m_DFFs.push_back(dff);
 }
@@ -498,7 +497,7 @@ void Netlist::prettyPrintInfos()
     if (ANDs().size() >= 1)
     {
         cout << "[STAT] ANDs:" << endl;
-        BOOST_FOREACH(AND* n, ANDs())
+        BOOST_FOREACH(auto n, ANDs())
         {
             n->prettyPrint();
         }
@@ -506,7 +505,7 @@ void Netlist::prettyPrintInfos()
     if (NANDs().size() >= 1)
     {
         cout << "[STAT] NANDs:" << endl;
-        BOOST_FOREACH(NAND* n, NANDs())
+        BOOST_FOREACH(auto n, NANDs())
         {
             n->prettyPrint();
         }

@@ -14,11 +14,6 @@ Gate::Gate()
 Gate::Gate(std::vector< boost::shared_ptr<Signal> > inputs, boost::shared_ptr<Signal> output)
     : m_inputs(inputs), m_output(output), m_hasPrimOutput(false)
 {
-    BOOST_FOREACH(auto s, m_inputs)
-    {
-        s->setTarget(this);
-    }
-    output->setSource(this);
 }
 
 void Gate::addInput(boost::shared_ptr<Signal> s)

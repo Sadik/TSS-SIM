@@ -107,7 +107,13 @@ void BenchFileParser::parseANDs(const std::string& line, Netlist* netlist)
             }
         }
 
-        netlist->addAND(new AND(inputs,so));
+        shared_ptr<AND> newNand = boost::make_shared<AND>(inputs, so);
+        netlist->addAND(newNand);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newNand);
+        }
+        so->setSource(newNand);
     }
 }
 
@@ -151,7 +157,13 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
         }
 
 
-        netlist->addNAND(new NAND(inputs,output));
+        shared_ptr<NAND> newNand = boost::make_shared<NAND>(inputs, output);
+        netlist->addNAND(newNand);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newNand);
+        }
+        output->setSource(newNand);
     }
 }
 
@@ -191,7 +203,13 @@ void BenchFileParser::parseORs(const std::string& line, Netlist* netlist)
             }
         }
 
-        netlist->addOR(new OR(inputs,so));
+        shared_ptr<OR> newOr = boost::make_shared<OR>(inputs, so);
+        netlist->addOR(newOr);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newOr);
+        }
+        so->setSource(newOr);
     }
 }
 
@@ -231,7 +249,13 @@ void BenchFileParser::parseNORs(const std::string& line, Netlist* netlist)
             }
         }
 
-        netlist->addNOR(new NOR(inputs,so));
+        shared_ptr<NOR> newNor = boost::make_shared<NOR>(inputs, so);
+        netlist->addNOR(newNor);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newNor);
+        }
+        so->setSource(newNor);
     }
 }
 
@@ -264,7 +288,13 @@ void BenchFileParser::parseNOTs(const std::string& line, Netlist* netlist)
         }
         inputs.push_back(si);
 
-        netlist->addNOT(new NOT(inputs,so));
+        shared_ptr<NOT> newNot = boost::make_shared<NOT>(inputs, so);
+        netlist->addNOT(newNot);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newNot);
+        }
+        so->setSource(newNot);
     }
 }
 
@@ -297,7 +327,13 @@ void BenchFileParser::parseBUFs(const std::string& line, Netlist* netlist)
         }
         inputs.push_back(si);
 
-        netlist->addBUF(new BUF(inputs,so));
+        shared_ptr<BUF> newBuf = boost::make_shared<BUF>(inputs, so);
+        netlist->addBUF(newBuf);
+        BOOST_FOREACH(auto s, inputs)
+        {
+            s->setTarget(newBuf);
+        }
+        so->setSource(newBuf);
     }
 }
 
