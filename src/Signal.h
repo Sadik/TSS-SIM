@@ -7,6 +7,8 @@
 #include <string>
 #include <bitset>
 
+#include <boost/make_shared.hpp>
+
 class Gate;
 class SAFault;
 

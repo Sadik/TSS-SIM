@@ -21,9 +21,12 @@ int main(int argc, char** argv)
     BenchFileParser* benchFileParser = new BenchFileParser(argv[1], netlist);
     PatternFileParser* patternFileParser = new PatternFileParser(argv[2]);
     std::vector<boost::dynamic_bitset<>> testPattern = patternFileParser->getTestPattern();
+    cout << "[INFO] tests: " << testPattern.size() << endl;
 
     netlist->prepare();
-    cout << "[INFO] tests: " << testPattern.size() << endl;
+    std::cout << "[INFO] stuck-at faults:         " << 2 * netlist->getAllSignals().size() << std::endl;
+    std::cout << "[INFO] after trivial reduction: " << netlist->getAllFaults().size() << std::endl;
+
     netlist->startSimulation(testPattern);
 
    /* BOOST_FOREACH( char ch, hello )

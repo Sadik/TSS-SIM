@@ -8,32 +8,31 @@ Netlist::Netlist()
 
 }
 
-/**
- * @brief Netlist::prepareGatesWithPrimOutput
- * sets the bool isPrimOutput to all outputs of gate.
- * TODO: hasn't this been done already?
- *
- * @param allGates
- */
-void Netlist::prepareGatesWithPrimOutput(std::vector < shared_ptr<Gate> > allGates)
-{
-    BOOST_FOREACH(auto g, allGates)
-    {
-        BOOST_FOREACH(auto s, primaryOutputs())
-        {
-            if (s->name() == g->output()->name())
-            {
-                g->setHasPrimOutput(true);
-            }
-        }
-    }
-}
-
 void Netlist::createFaults()
 {
     BOOST_FOREACH(auto s, m_allSignals) {
-        m_allFaults.push_back(new SAFault(1, s));
-        m_allFaults.push_back(new SAFault(0, s));
+        shared_ptr<Gate> target = s->target();
+        if (boost::dynamic_pointer_cast<AND>(target) != nullptr)
+        {
+            m_allFaults.push_back(new SAFault(1, s));
+            // sa0 for AND-input is equivalent to sa0 at AND-output
+        } else if (boost::dynamic_pointer_cast<NAND>(target) != nullptr)
+        {
+            m_allFaults.push_back(new SAFault(1, s));
+        } else if (boost::dynamic_pointer_cast<OR>(target) != nullptr)
+        {
+            m_allFaults.push_back(new SAFault(0, s));
+        } else if (boost::dynamic_pointer_cast<NOR>(target) != nullptr)
+        {
+            m_allFaults.push_back(new SAFault(0, s));
+        } else if (boost::dynamic_pointer_cast<NOT>(target) != nullptr)
+        {
+            // nothing
+        } else
+        {
+            m_allFaults.push_back(new SAFault(1, s));
+            m_allFaults.push_back(new SAFault(0, s));
+        }
     }
 }
 
@@ -108,6 +107,16 @@ bool Netlist::sortSignals (shared_ptr<Signal> i, shared_ptr<Signal> j) {
     return (i->name() < j->name());
 }
 
+boost::unordered_set<shared_ptr<Signal>, SignalHash, SignalEqual> Netlist::getAllSignals() const
+{
+    return m_allSignals;
+}
+
+std::vector<SAFault *> Netlist::getAllFaults() const
+{
+    return m_allFaults;
+}
+
 void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPattern)
 {
     std::cout << "[INFO] starting simulation" << std::endl;
@@ -117,7 +126,6 @@ void Netlist::startSimulation(const std::vector<boost::dynamic_bitset<>> &testPa
         compute(pattern);
     }
 
-    std::cout << "[RESULT] total faults:    " << m_allFaults.size() << std::endl;
     std::cout << "[RESULT] detected faults: " << m_detectedFaults.size() << std::endl;
     float coverage = (float)m_detectedFaults.size() / (float)m_allFaults.size();
     std::cout << "[RESULT] coverage:        " << coverage << std::endl;
@@ -246,11 +254,12 @@ std::vector<shared_ptr<Signal>> Netlist::primaryOutputs() const
 void Netlist::addSignal(shared_ptr<Signal> newSignal)
 {
     // wenn es das signal schon gibt, nicht hinzufügen
-    auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
-                  boost::bind( & Signal::compare,
-                               _1,
-                               newSignal->name() ) );
-    if (it != m_allSignals.end())
+//    auto it = std::find_if( m_allSignals.begin(), m_allSignals.end(),
+//                  boost::bind( & Signal::compare,
+//                               _1,
+//                               newSignal->name() ) );
+    auto it = std::find( m_allSignals.begin(), m_allSignals.end(), newSignal);
+    if (it == m_allSignals.end())
     {
         m_allSignals.insert(newSignal);
     } //TODO: CHECK IF TRUE
@@ -279,51 +288,6 @@ void Netlist::addPrimaryOutput(shared_ptr<Signal> s)
  */
 void Netlist::prepare()
 {
-    //set hasPrimaryOutput
-    prepareGatesWithPrimOutput(m_allGates);
-
-    m_allGates.insert( m_allGates.end(), m_ANDs.begin(), m_ANDs.end() );
-    m_allGates.insert( m_allGates.end(), m_ORs.begin(), m_ORs.end() );
-    m_allGates.insert( m_allGates.end(), m_NORs.begin(), m_NORs.end() );
-    m_allGates.insert( m_allGates.end(), m_NOTs.begin(), m_NOTs.end() );
-    m_allGates.insert( m_allGates.end(), m_BUFs.begin(), m_BUFs.end() );
-    m_allGates.insert( m_allGates.end(), m_NANDs.begin(), m_NANDs.end() );
-    //the DFFs have been collected, but we don't treat them as a gate (actually DFF is a flip flop, but in my case I don't need a new class only for the correct terminology)
-
-    BOOST_FOREACH(auto s, m_primaryInputs) {
-        m_allSignals.insert(s);
-    }
-
-    BOOST_FOREACH(auto s, m_primaryOutputs) {
-        m_allSignals.insert(s);
-    }
-
-    // Für jedes input signal des Gates schauen wir, ob es ein output signal eines anderen gates ist.
-    // Dann verbinden wir sie.
-    BOOST_FOREACH(auto g, m_allGates) {
-        BOOST_FOREACH(auto s, g->inputs()) {
-            BOOST_FOREACH(auto h, m_allGates) {
-                if (g == h)
-                    continue;
-                if (s->name() == h->output()->name()) {
-                    g->replaceInput(s, h->output());
-                }
-            }
-        }
-    }
-
-    //add signals to m_allSignals if they aren't already in the list (vector)
-    BOOST_FOREACH(auto g, m_allGates) {
-        if ( std::find(m_allSignals.begin(), m_allSignals.end(), g->output()) == m_allSignals.end() )
-           m_allSignals.insert(g->output());
-
-        BOOST_FOREACH(auto s, g->inputs()) {
-            if ( std::find(m_allSignals.begin(), m_allSignals.end(), s) == m_allSignals.end() )
-               m_allSignals.insert(s);
-        }
-
-    }
-
     //creates faults and stores them in m_allFaults
     // must be called after m_allSignals is filled
     createFaults();
@@ -407,6 +371,7 @@ void Netlist::addAND(shared_ptr<AND> a)
 void Netlist::addNAND(shared_ptr<NAND> n)
 {
     m_NANDs.push_back(n);
+    m_allGates.push_back(n);
 }
 
 void Netlist::addOR(shared_ptr<OR> o)

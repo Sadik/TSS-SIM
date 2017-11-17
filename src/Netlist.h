@@ -87,11 +87,14 @@ public:
     void startSimulation(const std::vector<boost::dynamic_bitset<> > &testPattern);
     void prettyPrintInfos();
 
+    std::vector<SAFault *> getAllFaults() const;
+
+    boost::unordered_set<shared_ptr<Signal>, SignalHash, SignalEqual> getAllSignals() const;
+
 private:
     void createFaults();
     bool differsFromGoodResult(const std::vector< shared_ptr<Signal> > result) const;
     SAFault *getFaultByName(std::string name);
-    void prepareGatesWithPrimOutput(std::vector<shared_ptr<Gate> > allGates);
     void resetValues();
     bool sortSignals(shared_ptr<Signal> i, shared_ptr<Signal> j);
 private:

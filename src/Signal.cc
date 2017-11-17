@@ -15,7 +15,7 @@ Signal::Signal(std::string name, bool isPrimary)
 
 shared_ptr<Signal> Signal::clone()
 {
-    shared_ptr<Signal> clone = make_shared<Signal>();
+    shared_ptr<Signal> clone = boost::make_shared<Signal>();
     clone->setTarget(target());
     clone->setSource(source());
     clone->setIsPrimary(isPrimary());

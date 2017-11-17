@@ -2,6 +2,11 @@
 
 using namespace boost;
 
+NAND::NAND()
+    : Gate()
+{
+}
+
 NAND::NAND(std::vector<shared_ptr<Signal> > inputs, shared_ptr<Signal> output)
     : Gate(inputs, output)
 {

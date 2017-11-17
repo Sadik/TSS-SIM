@@ -107,13 +107,13 @@ void BenchFileParser::parseANDs(const std::string& line, Netlist* netlist)
             }
         }
 
-        shared_ptr<AND> newNand = boost::make_shared<AND>(inputs, so);
-        netlist->addAND(newNand);
+        shared_ptr<AND> newAnd = boost::make_shared<AND>(inputs, so);
+        netlist->addAND(newAnd);
         BOOST_FOREACH(auto s, inputs)
         {
-            s->setTarget(newNand);
+            s->setTarget(newAnd);
         }
-        so->setSource(newNand);
+        so->setSource(newAnd);
     }
 }
 
@@ -143,6 +143,9 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
 
         shared_ptr<NAND> newNand = boost::make_shared<NAND>();
         newNand->setOutput(output);
+        output->setSource(newNand);
+        netlist->addSignal(output);
+        netlist->addNAND(newNand);
         BOOST_FOREACH(std::string signalName, values_str)
         {
             if (signalName == values_str[0]){
@@ -163,6 +166,8 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
                 shared_ptr<Signal> afterFanout2 = boost::make_shared<Signal>(s->name() + ".2_" + std::to_string(netlist->NANDs().size()));
                 afterFanout1->setSource(fanout);
                 afterFanout2->setSource(fanout);
+                netlist->addSignal(afterFanout1);
+                netlist->addSignal(afterFanout2);
 
                 auto gate1 = s->target();
                 afterFanout1->setTarget(gate1);
@@ -170,10 +175,8 @@ void BenchFileParser::parseNANDs(const std::string& line, Netlist* netlist)
 
                 s->setTarget(fanout);
                 afterFanout2->setTarget(newNand);
-
                 newNand->addInput(afterFanout2);
             } else {
-                inputs.push_back(s);
                 netlist->addSignal(s);
                 s->setTarget(newNand);
                 newNand->addInput(s);

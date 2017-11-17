@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 
 Gate::Gate()
+    : m_inputs(std::vector< boost::shared_ptr<Signal> >()), m_output(boost::shared_ptr<Signal>()), m_hasPrimOutput(false)
 {
 
 }
@@ -29,6 +30,8 @@ void Gate::replaceInput( shared_ptr<Signal> replaceThis, shared_ptr<Signal> with
 void Gate::setOutput(boost::shared_ptr<Signal> s)
 {
     m_output = s;
+    if (s->isPrimary())
+        setHasPrimOutput(true);
 }
 
 bool Gate::allInputsSet() const

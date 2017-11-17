@@ -6,22 +6,14 @@ inline const char * const BoolToString(bool b)
 }
 
 SAFault::SAFault(bool sa, boost::shared_ptr<Signal> signal)
+    : m_sa(sa), m_signal(signal), m_detected(false), m_name(signal->name() + "-sa" + BoolToString(sa))
 {
-    m_sa = sa;
-    m_signal = signal;
-    m_name = signal->name() + "-sa" + BoolToString(sa);
-    m_detected = false;
 }
 
 
 bool SAFault::sa() const
 {
     return m_sa;
-}
-
-void SAFault::setSa(bool sa)
-{
-    m_sa = sa;
 }
 
 bool SAFault::detected() const
@@ -38,4 +30,9 @@ void SAFault::setDetected()
 std::string SAFault::name() const
 {
     return m_name;
+}
+
+shared_ptr<Signal> SAFault::signal() const
+{
+    return m_signal;
 }
